@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>NOMAD: Hyperspace - Telemetry HUD</title>
+  <title>NOMAD: DIGIT - Telemetry HUD</title>
   <meta name="description" content="nomad_digit - text only telemetry HUD for mobilization by BostonyFX (@neurocosm)" />
-  <meta name="theme-color" content="#060b17" />
+  <meta name="theme-color" content="#050811" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #050811;
-      --bg-block: #0b1325;
-      --bg-block-hover: #101c36;
-      --border-color: rgba(0, 243, 255, 0.28);
-      --border-color-hover: rgba(0, 243, 255, 0.65);
+      --bg-card: #0b1325;
+      --bg-card-hover: #101c36;
+      --border-cyan: rgba(0, 243, 255, 0.32);
+      --border-cyan-bright: rgba(0, 243, 255, 0.75);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --text-dim: #475569;
       --accent-cyan: #00f3ff;
-      --accent-cyan-dim: #0284c7;
       --accent-green: #10b981;
-      --radius-pill-card: 26px;
+      --accent-amber: #f59e0b;
+      --radius-block: 22px;
     }
 
     * {
@@ -31,18 +33,25 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: 'Space Grotesk', -apple-system, sans-serif;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 14px 16px 24px;
-      line-height: 1.35;
+      justify-content: space-between;
+      padding: env(safe-area-inset-top, 6px) 12px env(safe-area-inset-bottom, 6px);
     }
 
     .font-mono {
@@ -50,189 +59,260 @@
       font-feature-settings: 'tnum' on, 'zero' on;
     }
 
-    /* Top Utility Bar */
-    .top-bar {
-      max-width: 580px;
+    /* Top Utility Header */
+    .top-header {
       width: 100%;
+      max-width: 440px;
+      height: 28px;
+      flex-shrink: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding: 2px 4px;
+      padding: 0 4px;
     }
 
-    .top-title {
-      font-size: 0.82rem;
+    .app-title {
+      font-size: 0.76rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       color: var(--accent-cyan);
-    }
-
-    .top-actions {
       display: flex;
+      align-items: center;
       gap: 6px;
     }
 
-    .btn-top {
-      background: #0b1325;
+    .app-title .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--accent-cyan);
+    }
+
+    .top-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn-ctrl {
+      background: var(--bg-card);
       color: var(--text-muted);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 0.72rem;
+      border: 1px solid var(--border-cyan);
+      border-radius: 12px;
+      padding: 2px 9px;
+      font-size: 0.64rem;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      line-height: 1.4;
+      transition: all 0.15s;
     }
 
-    .btn-top:hover {
+    .btn-ctrl:hover {
       color: var(--text-main);
-      border-color: var(--border-color-hover);
+      border-color: var(--border-cyan-bright);
     }
 
-    .btn-top.active {
+    .btn-ctrl.active {
       background: rgba(0, 243, 255, 0.16);
       color: var(--accent-cyan);
       border-color: var(--accent-cyan);
     }
 
-    /* Vertical 5-Block Stack matching the user's sketch */
-    .hud-stack {
-      max-width: 580px;
+    /* Vertical 5-Block Stack for Pixel 11 PRO / Mobile Viewport (100dvh non-scrollable) */
+    .blocks-stack {
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Rounded Rectangular Blocks */
-    .hud-card {
-      background: var(--bg-block);
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-pill-card);
-      padding: 18px 24px;
+      max-width: 440px;
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 120px;
+      gap: 7px;
+      margin: 4px 0;
+      min-height: 0;
+    }
+
+    /* Individual Rounded Horizontal Rectangular Block */
+    .rounded-block {
+      flex: 1;
+      min-height: 0;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-cyan);
+      border-radius: var(--radius-block);
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.2s, background-color 0.2s;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+      transition: border-color 0.15s, background-color 0.15s, transform 0.1s;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
     }
 
-    .hud-card:hover {
-      background: var(--bg-block-hover);
-      border-color: var(--border-color-hover);
-      transform: translateY(-1px);
+    .rounded-block:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-cyan-bright);
     }
 
-    .hud-card:active {
-      transform: scale(0.995);
+    .rounded-block:active {
+      transform: scale(0.992);
     }
 
-    .card-meta-top {
+    .block-meta-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.75rem;
+      font-size: 0.62rem;
       font-family: 'JetBrains Mono', monospace;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-dim);
+      line-height: 1;
     }
 
-    .status-badge {
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.7rem;
+    .block-badge {
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 0.6rem;
       font-weight: 700;
       background: rgba(0, 243, 255, 0.12);
       border: 1px solid rgba(0, 243, 255, 0.35);
       color: var(--accent-cyan);
+      line-height: 1.3;
     }
 
-    .status-badge.stopped {
+    .block-badge.stopped {
       background: rgba(148, 163, 184, 0.1);
       border-color: rgba(148, 163, 184, 0.3);
       color: var(--text-muted);
     }
 
-    .status-badge.locked {
+    .block-badge.locked {
       background: rgba(16, 185, 129, 0.12);
       border-color: rgba(16, 185, 129, 0.4);
       color: var(--accent-green);
     }
 
-    /* Center Content Display */
-    .card-center-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin: 4px 0;
+    /* Subdivided Columns within a Block for Maximum Readability */
+    .metric-split-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      align-items: center;
+      margin: 2px 0;
     }
 
-    .card-hero-val {
-      font-size: 3.4rem;
+    .metric-col {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .metric-col:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 15%;
+      height: 70%;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .col-title {
+      font-size: 0.58rem;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      margin-bottom: 1px;
+    }
+
+    .col-hero {
+      font-size: clamp(1.15rem, 3.2vh, 1.55rem);
       font-weight: 800;
-      line-height: 1;
+      line-height: 1.05;
       color: var(--text-main);
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
     }
 
-    .card-hero-val .unit {
-      font-size: 1.25rem;
-      font-weight: 700;
+    .col-hero .sub-unit {
+      font-size: 0.72rem;
       color: var(--accent-cyan);
+      font-weight: 700;
+      margin-left: 2px;
     }
 
-    .card-secondary-val {
-      font-size: 1.15rem;
-      font-weight: 600;
+    .col-subtext {
+      font-size: 0.62rem;
+      font-family: 'JetBrains Mono', monospace;
       color: var(--text-muted);
-      text-align: right;
+      margin-top: 1px;
     }
 
-    /* Subtitle / Footer info in each card */
-    .card-meta-bottom {
+    /* Block Meta Bottom Row */
+    .block-meta-bottom {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem;
+      font-size: 0.62rem;
       font-family: 'JetBrains Mono', monospace;
       color: var(--text-muted);
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding-top: 8px;
-      margin-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 4px;
+      line-height: 1;
     }
 
+    /* Philosophy Quote Styling */
+    .phil-quote-text {
+      font-size: clamp(0.74rem, 1.9vh, 0.86rem);
+      font-weight: 500;
+      line-height: 1.28;
+      color: #e2e8f0;
+      font-style: italic;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin: 2px 0;
+    }
+
+    .phil-author {
+      font-size: 0.66rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Toast Notification */
     .toast-pill {
       position: fixed;
-      bottom: 22px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
       background: var(--accent-green);
       color: #022c22;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-size: 0.72rem;
       font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
       display: none;
       z-index: 100;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
     }
 
-    .footer-credits {
-      margin-top: 16px;
-      text-align: center;
-      font-size: 0.72rem;
+    .footer-bar {
+      height: 16px;
+      flex-shrink: 0;
+      font-size: 0.6rem;
       color: var(--text-dim);
       font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      line-height: 16px;
     }
 
-    .footer-credits a {
+    .footer-bar a {
       color: var(--accent-cyan);
       text-decoration: none;
     }
@@ -240,7 +320,7 @@
 </head>
 <body>
 
-  <!-- Non-rendered DOM Telemetry Vault -->
+  <!-- Non-rendered DOM Telemetry Vault for external scripts -->
   <div class="hidden-telemetry-vault" style="display:none;" aria-hidden="true">
     <span id="currentLatitude">42.360100</span>
     <span id="currentLongitude">-71.058900</span>
@@ -255,140 +335,224 @@
     <span id="gpsTimestamp">0</span>
   </div>
 
-  <!-- Top Utilities -->
-  <div class="top-bar">
-    <div class="top-title nomad-brand">NOMAD: Hyperspace</div>
-    <div class="top-actions">
-      <button id="btn-sim" class="btn-top" title="Toggle Highway Driving Simulator">DRIVE SIM</button>
-      <button id="btn-audio" class="btn-top active" title="Audio Tones">AUDIO: ON</button>
+  <!-- Top Controls -->
+  <div class="top-header">
+    <div class="app-title nomad-brand">
+      <span class="dot"></span>
+      <span>NOMAD: DIGIT</span>
+    </div>
+    <div class="top-controls">
+      <button id="btn-audio" class="btn-ctrl active" title="Avionics Sound">AUDIO: ON</button>
     </div>
   </div>
 
-  <!-- 5 Horizontal Stacked Rounded Blocks -->
-  <div class="hud-stack">
+  <!-- 5 Rounded Horizontal Rectangular Blocks (Orientation per User Sketch) -->
+  <div class="blocks-stack">
 
-    <!-- BLOCK 1: Speed Telemetry Object (#speed-bubble) -->
-    <div id="speed-bubble" class="hud-card" title="Tap to toggle MPH / KM/H">
-      <div class="card-meta-top">
-        <span>01 // SPEED TELEMETRY</span>
-        <span id="speed-status-badge" class="status-badge stopped">STOPPED</span>
+    <!-- BLOCK 1: Location & Coordinates -->
+    <div id="block-location" class="rounded-block" title="Tap to copy coordinates">
+      <div class="block-meta-top">
+        <span>01 // LOCATION &amp; COORDINATES</span>
+        <span id="corridor-axis-badge" class="block-badge stopped">SEEKING SIGNAL...</span>
       </div>
-      <div class="card-center-row">
-        <div class="card-hero-val font-mono">
-          <span id="speed-display">0.0</span>
-          <span id="speed-unit-display" class="unit">MPH</span>
+      <div style="margin: 1px 0; min-width: 0;">
+        <div id="street-name" style="font-size: clamp(0.92rem, 2.3vh, 1.12rem); font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          Resolving Location...
         </div>
-        <div class="card-secondary-val font-mono">
-          <span id="raw-speed-display" style="font-size: 0.95rem; color: var(--text-dim);">0.00 m/s</span>
+        <div id="city-state-county" style="font-size: clamp(0.68rem, 1.7vh, 0.78rem); color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          Triangulating GNSS &amp; Wi-Fi Network
         </div>
       </div>
-      <div class="card-meta-bottom">
-        <span>DEADBAND: &lt; 1.8 MPH CLAMP</span>
-        <span>TAP TO TOGGLE MPH / KM/H</span>
+      <div class="block-meta-bottom">
+        <span id="coords-lat-lon" class="font-mono" style="color: var(--accent-cyan); font-weight: 600;">
+          ACQUIRING POSITION...
+        </span>
+        <span style="color: var(--accent-cyan); font-weight: 600;">TAP: COPY COORDS</span>
       </div>
     </div>
 
-    <!-- BLOCK 2: Compass & Bearing Telemetry Object (#cmps-bubble) -->
-    <div id="cmps-bubble" class="hud-card" title="Tap to calibrate orientation">
-      <div class="card-meta-top">
-        <span>02 // BEARING & CORRIDOR AXIS</span>
-        <span id="corridor-axis-badge" class="status-badge locked">NORTHBOUND</span>
+    <!-- BLOCK 2: Motion, Bearing & Elevation -->
+    <div id="block-motion" class="rounded-block" title="Tap to toggle MPH / KM/H">
+      <div class="block-meta-top">
+        <span>02 // MOTION &amp; AVIONICS</span>
+        <span id="speed-status-badge" class="block-badge stopped">STOPPED</span>
       </div>
-      <div class="card-center-row">
-        <div class="card-hero-val font-mono">
-          <span id="heading-cardinal-display">NNE</span>
-          <span id="heading-degrees-display" class="unit">018°</span>
-        </div>
-        <div class="card-secondary-val font-mono">
-          <span id="corridor-lock-text" style="color: var(--accent-cyan); font-size: 0.95rem;">I-95 AXIS LOCKED</span>
-        </div>
-      </div>
-      <div class="card-meta-bottom">
-        <span>HYSTERESIS: ±15° DEADBAND</span>
-        <span id="compass-sensor-type">GNSS COURSE</span>
-      </div>
-    </div>
-
-    <!-- BLOCK 3: Weather & Temperature Telemetry Object (#weather-bubble) -->
-    <div id="weather-bubble" class="hud-card" title="Tap to toggle °F / °C">
-      <div class="card-meta-top">
-        <span>03 // AMBIENT WEATHER</span>
-        <span id="humidity-display" class="status-badge">46% RH</span>
-      </div>
-      <div class="card-center-row">
-        <div class="card-hero-val font-mono">
-          <span id="temp-display">72.4</span>
-          <span id="temp-unit-display" class="unit">°F</span>
-        </div>
-        <div class="card-secondary-val">
-          <span id="weather-condition-display" style="color: var(--text-main); font-size: 1.15rem;">Clear Sky</span>
-        </div>
-      </div>
-      <div class="card-meta-bottom">
-        <span>OPEN-METEO 10M CACHE</span>
-        <span>TAP TO TOGGLE °F / °C</span>
-      </div>
-    </div>
-
-    <!-- BLOCK 4: Barometric Pressure Telemetry Object (#baro-bubble) -->
-    <div id="baro-bubble" class="hud-card" title="Tap to toggle inHg / hPa">
-      <div class="card-meta-top">
-        <span>04 // BAROMETRIC PRESSURE</span>
-        <span id="baro-trend-badge" class="status-badge">STEADY</span>
-      </div>
-      <div class="card-center-row">
-        <div class="card-hero-val font-mono">
-          <span id="baro-display">29.92</span>
-          <span id="baro-unit-display" class="unit">inHg</span>
-        </div>
-        <div class="card-secondary-val font-mono">
-          <span id="baro-hpa-display" style="font-size: 1.05rem; color: var(--text-muted);">1013.2 hPa</span>
-        </div>
-      </div>
-      <div class="card-meta-bottom">
-        <span>UV INDEX: <strong id="uv-display" style="color:var(--text-main);">3.2</strong></span>
-        <span>TAP TO TOGGLE inHg / hPa</span>
-      </div>
-    </div>
-
-    <!-- BLOCK 5: Coordinates & Navigation Telemetry Object (#coords-bubble) -->
-    <div id="coords-bubble" class="hud-card" title="Tap to copy coordinates & navigation link">
-      <div class="card-meta-top">
-        <span>05 // GEOSPATIAL POSITION & ELEVATION</span>
-        <span class="status-badge">WGS84 6-DEC</span>
-      </div>
-      <div class="card-center-row" style="margin: 6px 0;">
-        <div style="display: flex; flex-direction: column;">
-          <div style="font-size: 1.05rem; font-weight: 700; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;" id="coords-lat-lon">
-            42.360100° N, 71.058900° W
+      <div class="metric-split-row">
+        <!-- Speed -->
+        <div class="metric-col">
+          <span class="col-title">SPEED</span>
+          <div class="col-hero font-mono">
+            <span id="speed-val">0.0</span><span id="speed-unit-val" class="sub-unit">MPH</span>
           </div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="location-name-display">
-            I-95 North Corridor • Boston, MA
-          </div>
+          <span class="col-subtext">&lt;1.8 CLAMP</span>
         </div>
-        <div class="card-secondary-val font-mono" style="text-align: right;">
-          <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);"><span id="coords-alt-ft">48</span> FT MSL</div>
-          <div style="font-size: 0.78rem; color: var(--text-dim);"><span id="coords-alt-m">14.5</span> M</div>
+        <!-- Direction / Compass -->
+        <div class="metric-col">
+          <span class="col-title">BEARING</span>
+          <div class="col-hero font-mono">
+            <span id="heading-card-val">NNE</span><span id="heading-deg-val" class="sub-unit">018°</span>
+          </div>
+          <span id="sensor-type-val" class="col-subtext">GNSS COURSE</span>
+        </div>
+        <!-- Altimeter / Elevation -->
+        <div class="metric-col">
+          <span class="col-title">ELEVATION</span>
+          <div class="col-hero font-mono">
+            <span id="alt-ft-val">48</span><span class="sub-unit">FT</span>
+          </div>
+          <span id="alt-m-val" class="col-subtext">14.5 M (MSL)</span>
         </div>
       </div>
-      <div class="card-meta-bottom">
-        <span>ACCURACY: <span id="accuracy-display">±4.0 M</span></span>
-        <span style="color: var(--accent-cyan);">TAP TO COPY NAV LINK</span>
+      <div class="block-meta-bottom">
+        <span id="vertical-speed-val">RATE: 0.0 m/s</span>
+        <span>TAP: TOGGLE UNITS</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 3: Weather & Atmosphere -->
+    <div id="block-weather" class="rounded-block" title="Tap to toggle °F / °C & inHg / hPa">
+      <div class="block-meta-top">
+        <span>03 // WEATHER &amp; ATMOSPHERE</span>
+        <span id="weather-condition-badge" class="block-badge">CLEAR SKY</span>
+      </div>
+      <div class="metric-split-row">
+        <!-- Temperature -->
+        <div class="metric-col">
+          <span class="col-title">TEMP</span>
+          <div class="col-hero font-mono">
+            <span id="temp-val">72.4</span><span id="temp-unit-val" class="sub-unit">°F</span>
+          </div>
+          <span class="col-subtext">OPEN-METEO</span>
+        </div>
+        <!-- Humidity & UV -->
+        <div class="metric-col">
+          <span class="col-title">ATMOSPHERE</span>
+          <div class="col-hero font-mono">
+            <span id="humidity-val">46</span><span class="sub-unit">%RH</span>
+          </div>
+          <span id="uv-val" class="col-subtext">UV 3.2 MOD</span>
+        </div>
+        <!-- Barometric Pressure -->
+        <div class="metric-col">
+          <span class="col-title">BAROMETER</span>
+          <div class="col-hero font-mono">
+            <span id="baro-val">29.92</span><span id="baro-unit-val" class="sub-unit">inHg</span>
+          </div>
+          <span id="baro-trend-val" class="col-subtext">1013.2 hPa • STEADY</span>
+        </div>
+      </div>
+      <div class="block-meta-bottom">
+        <span>ATMOSPHERIC TELEMETRY</span>
+        <span>TAP: TOGGLE °F / °C</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 4: Chronometry -->
+    <div id="block-time" class="rounded-block" title="Synchronized Local Chronometry">
+      <div class="block-meta-top">
+        <span>04 // CHRONOMETRY &amp; TIMEGRID</span>
+        <span id="timezone-badge" class="block-badge locked">LOCAL TIME</span>
+      </div>
+      <div class="metric-split-row">
+        <!-- Time AM/PM -->
+        <div class="metric-col" style="grid-column: span 2;">
+          <span class="col-title">TIME</span>
+          <div class="col-hero font-mono" style="font-size: clamp(1.4rem, 3.8vh, 1.95rem); letter-spacing: -0.02em;">
+            <span id="clock-time">12:00:00</span>
+            <span id="clock-ampm" class="sub-unit" style="font-size: 0.85rem;">PM</span>
+          </div>
+          <span id="clock-millis" class="col-subtext">UTC SYNCED</span>
+        </div>
+        <!-- Day & Date (MM DD YYYY) -->
+        <div class="metric-col" style="text-align: right; align-items: flex-end;">
+          <span class="col-title">DAY &amp; DATE</span>
+          <div id="clock-day" style="font-size: clamp(0.92rem, 2.4vh, 1.15rem); font-weight: 800; color: var(--accent-cyan); text-transform: uppercase;">
+            TUESDAY
+          </div>
+          <span id="clock-date" class="font-mono" style="font-size: clamp(0.68rem, 1.7vh, 0.78rem); color: var(--text-main); font-weight: 600; margin-top: 1px;">
+            09 29 2026
+          </span>
+        </div>
+      </div>
+      <div class="block-meta-bottom">
+        <span>PRECISION GNSS TIME STAMP</span>
+        <span id="epoch-seconds" class="font-mono">T-00:00</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 5: Philosophical Insight / API -->
+    <div id="block-philosophy" class="rounded-block" title="Tap to fetch next philosophical insight">
+      <div class="block-meta-top">
+        <span>05 // PHILOSOPHICAL COGNITION</span>
+        <span id="phil-status-badge" class="block-badge">PHILOSOPHY API</span>
+      </div>
+      <div style="margin: 2px 0;">
+        <div id="phil-quote" class="phil-quote-text">
+          "The soul becomes dyed with the color of its thoughts."
+        </div>
+      </div>
+      <div class="block-meta-bottom">
+        <span id="phil-author" class="phil-author">— Marcus Aurelius</span>
+        <span style="color: var(--accent-cyan); font-weight: 600;">TAP: REFRESH</span>
       </div>
     </div>
 
   </div>
 
   <!-- Footer Credits -->
-  <footer class="footer-credits nomad-footer">
-    NOMAD: Hyperspace Navigation Dashboard • Crafted by BostonyFX
+  <footer class="footer-bar nomad-footer">
+    NOMAD: DIGIT • Telemetry HUD • Crafted by BostonyFX
   </footer>
 
   <div id="toast-pill" class="toast-pill">COPIED TO CLIPBOARD</div>
 
-  <script type="module" src="/version.js"></script>
-  <script type="module">
-    import { NOMAD_VERSION_INFO, hydrateNomadMergeTags } from '/version.js';
+  <script src="/version.js"></script>
+  <script>
+    // State lookup table for US states
+    const US_STATES = {
+      "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
+      "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
+      "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+      "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+      "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
+      "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
+      "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
+      "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+      "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
+      "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
+    };
+
+    function abbreviateStreetName(streetName) {
+      if (!streetName) return '';
+      return streetName
+        .replace(/\b(?:Route|State Route|State Hwy|SR)\s+(\d{1,3}[A-Z]?)\b/gi, '$1')
+        .replace(/\bStreet\b/gi, 'St.')
+        .replace(/\bAvenue\b/gi, 'Ave.')
+        .replace(/\bBoulevard\b/gi, 'Blvd.')
+        .replace(/\bDrive\b/gi, 'Dr.')
+        .replace(/\bRoad\b/gi, 'Rd.')
+        .replace(/\bLane\b/gi, 'Ln.')
+        .replace(/\bCourt\b/gi, 'Ct.')
+        .replace(/\bPlace\b/gi, 'Pl.')
+        .replace(/\bTerrace\b/gi, 'Ter.')
+        .replace(/\bCircle\b/gi, 'Cir.')
+        .replace(/\bParkway\b/gi, 'Pkwy.')
+        .replace(/\bHighway\b/gi, 'Hwy.')
+        .replace(/\bTurnpike\b/gi, 'Tpk.')
+        .replace(/\bNorth\b/gi, 'N.')
+        .replace(/\bSouth\b/gi, 'S.')
+        .replace(/\bEast\b/gi, 'E.')
+        .replace(/\bWest\b/gi, 'W.')
+        .replace(/\bNortheast\b/gi, 'NE')
+        .replace(/\bNorthwest\b/gi, 'NW')
+        .replace(/\bSoutheast\b/gi, 'SE')
+        .replace(/\bSouthwest\b/gi, 'SW');
+    }
+
+    // Remove any legacy calibration from local storage
+    try {
+      localStorage.removeItem('nomad_calibrated_location');
+    } catch (e) {}
 
     const state = {
       speedUnit: 'MPH',
@@ -398,36 +562,95 @@
       clampedSpeedMph: 0,
       clampedSpeedKmh: 0,
       speedStatus: 'STOPPED',
-      latitude: 42.3601,
-      longitude: -71.0589,
+      latitude: 0,
+      longitude: 0,
       altitudeM: 14.5,
       altitudeFt: 47.6,
       verticalSpeedMps: 0,
       headingDeg: 18.0,
       headingCard: 'NNE',
-      corridorAxis: 'North',
-      isCorridorLocked: true,
-      accuracyM: 4.0,
-      isSimulating: false,
+      headingSource: 'STANDBY',
+      corridorAxis: 'Open',
+      isCorridorLocked: false,
+      accuracyM: 0,
+      hasRealGpsLock: false,
+      locationSource: 'SEARCHING', // 'GPS' | 'WIFI_IP' | 'SEARCHING'
+      lastGeocodedLat: null,
+      lastGeocodedLon: null,
+      lastGeocodedTime: 0,
       soundEnabled: true,
       weather: {
-        tempF: 72.4,
-        tempC: 22.4,
-        condition: 'Clear Sky',
-        humidity: 46,
+        tempF: 72.0,
+        tempC: 22.0,
+        condition: 'Scanning...',
+        humidity: 50,
         pressureInHg: 29.92,
         pressureHpa: 1013.2,
         trend: 'Steady',
-        uv: 3.2,
+        uv: 3.0,
       },
       location: {
-        road: 'I-95 North Corridor',
-        cityState: 'Boston, MA',
-        countyZip: 'Suffolk County • 02108',
-        googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=42.360100,-71.058900'
+        road: 'Resolving Location...',
+        cityState: 'Scanning Wi-Fi / GNSS Network',
+        county: '',
+        zip: '',
+        googleMapsUrl: ''
+      },
+      philosophy: {
+        quote: 'The soul becomes dyed with the color of its thoughts.',
+        author: 'Marcus Aurelius'
       }
     };
 
+    // Philosophy corpus
+    const fallbackQuotes = [
+      { quote: 'The soul becomes dyed with the color of its thoughts.', author: 'Marcus Aurelius' },
+      { quote: 'We suffer more often in imagination than in reality.', author: 'Seneca' },
+      { quote: 'He who has a why to live can bear almost any how.', author: 'Friedrich Nietzsche' },
+      { quote: 'The journey of a thousand miles begins with a single step.', author: 'Lao Tzu' },
+      { quote: 'Nature does not hurry, yet everything is accomplished.', author: 'Lao Tzu' },
+      { quote: 'Muddy water is best cleared by leaving it alone.', author: 'Alan Watts' },
+      { quote: 'You are an aperture through which the universe is looking at itself.', author: 'Alan Watts' },
+      { quote: 'In the depth of winter, I finally learned that within me there lay an invincible summer.', author: 'Albert Camus' },
+      { quote: 'Happiness is the meaning and the purpose of life, the whole aim of human existence.', author: 'Aristotle' },
+      { quote: 'Freedom is what you do with what’s been done to you.', author: 'Jean-Paul Sartre' },
+      { quote: 'Wonder is the beginning of wisdom.', author: 'Socrates' },
+      { quote: 'Peace comes from within. Do not seek it without.', author: 'Gautama Buddha' }
+    ];
+
+    let quoteIndex = 0;
+    async function fetchPhilosophicalFact() {
+      const badge = document.getElementById('phil-status-badge');
+      if (badge) badge.textContent = 'QUERYING...';
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        const res = await fetch('https://api.quotable.io/random?tags=philosophy|wisdom', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          state.philosophy.quote = data.content;
+          state.philosophy.author = data.author;
+          if (badge) badge.textContent = 'PHILOSOPHY API';
+          renderPhilosophy();
+          return;
+        }
+      } catch (e) {}
+
+      quoteIndex = (quoteIndex + 1) % fallbackQuotes.length;
+      state.philosophy = fallbackQuotes[quoteIndex];
+      if (badge) badge.textContent = 'PHILOSOPHY API';
+      renderPhilosophy();
+    }
+
+    function renderPhilosophy() {
+      const quoteEl = document.getElementById('phil-quote');
+      const authorEl = document.getElementById('phil-author');
+      if (quoteEl) quoteEl.textContent = `"${state.philosophy.quote}"`;
+      if (authorEl) authorEl.textContent = `— ${state.philosophy.author}`;
+    }
+
+    // Audio Engine
     let audioCtx = null;
     function playTone(freq = 1200) {
       if (!state.soundEnabled) return;
@@ -448,6 +671,7 @@
 
     function showToast(text) {
       const toast = document.getElementById('toast-pill');
+      if (!toast) return;
       toast.textContent = text;
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 1800);
@@ -458,46 +682,158 @@
       return dir[Math.round(((deg % 360 + 360) % 360) / 22.5) % 16];
     }
 
+    // AASHTO Highway Corridor Grid Axis Engine with ±15° Directional Hysteresis
+    let prevHighwayDirection = '';
+    function getHighwayCorridorAxis(routeNumber, highwayType = '') {
+      if (!routeNumber) return 'any';
+      const clean = String(routeNumber).toUpperCase().trim();
+      const isInterstate = highwayType === 'interstate' || /^I[-\s]?\d+/i.test(clean) || clean.includes('INTERSTATE');
+      const isUS = highwayType === 'us' || /^US[-\s]?\d+/i.test(clean);
+      const isState = highwayType === 'state' || /^(?:RT|ROUTE|SR|MA)[-\s]?\d+/i.test(clean);
+
+      const numMatch = clean.match(/\d+/);
+      const num = numMatch ? parseInt(numMatch[0], 10) : null;
+
+      if (num !== null) {
+        if (num === 128) return 'north-south';
+        if ([3, 24, 140, 12, 8, 7, 28, 38].includes(num)) return 'north-south';
+        if ([2, 9, 20, 30, 119].includes(num)) return 'east-west';
+
+        // Interstate Highway Grid (AASHTO standard: Odd = N/S, Even = E/W)
+        if (isInterstate || (!isUS && !isState && [95, 93, 90, 84, 80, 91, 87, 495, 290, 195, 295, 395].includes(num))) {
+          const baseNum = num >= 100 ? (num % 100) : num;
+          return (baseNum % 2 === 1) ? 'north-south' : 'east-west';
+        }
+        if (isUS || isState) {
+          return (num % 2 === 1) ? 'north-south' : 'east-west';
+        }
+      }
+      return 'any';
+    }
+
+    function calculateConstrainedDirection(heading, routeNumber = '') {
+      if (heading === null || isNaN(heading)) return '';
+      const norm = (heading % 360 + 360) % 360;
+      const axis = getHighwayCorridorAxis(routeNumber);
+
+      if (axis === 'north-south') {
+        if (prevHighwayDirection === 'North') {
+          prevHighwayDirection = (norm > 105 && norm < 255) ? 'South' : 'North';
+        } else if (prevHighwayDirection === 'South') {
+          prevHighwayDirection = (norm < 75 || norm > 285) ? 'North' : 'South';
+        } else {
+          prevHighwayDirection = (norm >= 90 && norm <= 270) ? 'South' : 'North';
+        }
+        return prevHighwayDirection;
+      } else if (axis === 'east-west') {
+        if (prevHighwayDirection === 'East') {
+          prevHighwayDirection = (norm > 195 && norm < 345) ? 'West' : 'East';
+        } else if (prevHighwayDirection === 'West') {
+          prevHighwayDirection = (norm > 15 && norm < 165) ? 'East' : 'West';
+        } else {
+          prevHighwayDirection = (norm >= 0 && norm < 180) ? 'East' : 'West';
+        }
+        return prevHighwayDirection;
+      }
+
+      // Default 4-Quadrant
+      if (norm >= 315 || norm < 45) return 'North';
+      if (norm >= 45 && norm < 135) return 'East';
+      if (norm >= 135 && norm < 225) return 'South';
+      return 'West';
+    }
+
+    // Chronometry Engine
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const strHours = String(hours).padStart(2, '0');
+      const strMinutes = String(now.getMinutes()).padStart(2, '0');
+      const strSeconds = String(now.getSeconds()).padStart(2, '0');
+
+      document.getElementById('clock-time').textContent = `${strHours}:${strMinutes}:${strSeconds}`;
+      document.getElementById('clock-ampm').textContent = ampm;
+
+      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+      document.getElementById('clock-day').textContent = days[now.getDay()];
+
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      document.getElementById('clock-date').textContent = `${mm} ${dd} ${yyyy}`;
+      document.getElementById('epoch-seconds').textContent = `T-${Math.floor(now.getTime() / 1000) % 100000}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
     function updateDOM() {
-      // 1. Speed
-      const speedVal = state.speedUnit === 'MPH' ? state.clampedSpeedMph : state.clampedSpeedKmh;
-      document.getElementById('speed-display').textContent = speedVal.toFixed(1);
-      document.getElementById('speed-unit-display').textContent = state.speedUnit;
-      document.getElementById('raw-speed-display').textContent = `${state.rawSpeedMps.toFixed(2)} m/s`;
+      // Block 1: Location & Coordinates
+      document.getElementById('street-name').textContent = state.location.road;
+      const subParts = [state.location.cityState, state.location.county, state.location.zip].filter(Boolean);
+      document.getElementById('city-state-county').textContent = subParts.join(' • ') || 'Triangulating position...';
       
-      const speedBadge = document.getElementById('speed-status-badge');
-      speedBadge.textContent = state.speedStatus;
-      speedBadge.className = 'status-badge ' + (state.speedStatus === 'STOPPED' ? 'stopped' : 'locked');
+      if (state.latitude !== 0 || state.longitude !== 0) {
+        const latStr = `${Math.abs(state.latitude).toFixed(6)}° ${state.latitude >= 0 ? 'N' : 'S'}`;
+        const lonStr = `${Math.abs(state.longitude).toFixed(6)}° ${state.longitude >= 0 ? 'E' : 'W'}`;
+        document.getElementById('coords-lat-lon').textContent = `${latStr}, ${lonStr}`;
+      } else {
+        document.getElementById('coords-lat-lon').textContent = 'ACQUIRING POSITION...';
+      }
+      
+      const badgeLoc = document.getElementById('corridor-axis-badge');
+      if (state.locationSource === 'GPS') {
+        if (state.accuracyM <= 1.8) {
+          badgeLoc.textContent = `DUAL-FREQ L1+L5: ±${state.accuracyM.toFixed(1)}M`;
+        } else if (state.accuracyM <= 5.0) {
+          badgeLoc.textContent = `GNSS 4-CONSTEL: ±${state.accuracyM.toFixed(1)}M`;
+        } else if (state.accuracyM <= 15.0) {
+          badgeLoc.textContent = `A-GPS MULTI-SAT: ±${state.accuracyM.toFixed(1)}M`;
+        } else {
+          badgeLoc.textContent = `WI-FI / CELL: ±${state.accuracyM.toFixed(1)}M`;
+        }
+        badgeLoc.className = 'block-badge ' + (state.accuracyM <= 10 ? 'locked' : '');
+      } else if (state.locationSource === 'WIFI_IP') {
+        badgeLoc.textContent = `WI-FI / NET GEO: ±${Math.round(state.accuracyM / 1000)}KM`;
+        badgeLoc.className = 'block-badge stopped';
+      } else {
+        badgeLoc.textContent = 'SEEKING SIGNAL...';
+        badgeLoc.className = 'block-badge stopped';
+      }
 
-      // 2. Compass & Corridor
-      document.getElementById('heading-cardinal-display').textContent = state.headingCard;
-      document.getElementById('heading-degrees-display').textContent = Math.round(state.headingDeg).toString().padStart(3, '0') + '°';
-      document.getElementById('corridor-axis-badge').textContent = state.isCorridorLocked ? `${state.corridorAxis.toUpperCase()}BOUND` : 'OPEN GRID';
-      document.getElementById('corridor-lock-text').textContent = state.isCorridorLocked ? 'I-95 AXIS LOCKED' : 'UNCONSTRAINED';
+      // Block 2: Motion, Speed & Bearing & Elevation
+      const speedVal = state.speedUnit === 'MPH' ? state.clampedSpeedMph : state.clampedSpeedKmh;
+      document.getElementById('speed-val').textContent = speedVal.toFixed(1);
+      document.getElementById('speed-unit-val').textContent = state.speedUnit;
+      
+      const badge = document.getElementById('speed-status-badge');
+      badge.textContent = state.speedStatus;
+      badge.className = 'block-badge ' + (state.speedStatus === 'STOPPED' ? 'stopped' : 'locked');
 
-      // 3. Weather
+      document.getElementById('heading-card-val').textContent = state.headingCard;
+      document.getElementById('heading-deg-val').textContent = Math.round(state.headingDeg).toString().padStart(3, '0') + '°';
+      document.getElementById('sensor-type-val').textContent = state.headingSource;
+
+      document.getElementById('alt-ft-val').textContent = Math.round(state.altitudeFt);
+      document.getElementById('alt-m-val').textContent = `${state.altitudeM.toFixed(1)} M (MSL)`;
+      document.getElementById('vertical-speed-val').textContent = `RATE: ${state.verticalSpeedMps >= 0 ? '+' : ''}${state.verticalSpeedMps.toFixed(1)} m/s`;
+
+      // Block 3: Weather & Atmosphere
       const tempVal = state.tempUnit === 'F' ? state.weather.tempF : state.weather.tempC;
-      document.getElementById('temp-display').textContent = tempVal.toFixed(1);
-      document.getElementById('temp-unit-display').textContent = `°${state.tempUnit}`;
-      document.getElementById('weather-condition-display').textContent = state.weather.condition;
-      document.getElementById('humidity-display').textContent = `${state.weather.humidity}% RH`;
+      document.getElementById('temp-val').textContent = tempVal.toFixed(1);
+      document.getElementById('temp-unit-val').textContent = `°${state.tempUnit}`;
+      document.getElementById('weather-condition-badge').textContent = state.weather.condition.toUpperCase();
+      document.getElementById('humidity-val').textContent = state.weather.humidity;
+      document.getElementById('uv-val').textContent = `UV ${state.weather.uv} (${state.weather.uv > 5 ? 'HIGH' : 'MOD'})`;
 
-      // 4. Barometer
       const baroVal = state.baroUnit === 'inHg' ? state.weather.pressureInHg.toFixed(2) : state.weather.pressureHpa.toFixed(1);
-      document.getElementById('baro-display').textContent = baroVal;
-      document.getElementById('baro-unit-display').textContent = state.baroUnit;
-      document.getElementById('baro-hpa-display').textContent = `${state.weather.pressureHpa.toFixed(1)} hPa`;
-      document.getElementById('baro-trend-badge').textContent = state.weather.trend.toUpperCase();
-      document.getElementById('uv-display').textContent = state.weather.uv;
+      document.getElementById('baro-val').textContent = baroVal;
+      document.getElementById('baro-unit-val').textContent = state.baroUnit;
+      document.getElementById('baro-trend-val').textContent = `${state.weather.pressureHpa.toFixed(1)} hPa • ${state.weather.trend.toUpperCase()}`;
 
-      // 5. Coordinates & Location
-      document.getElementById('coords-lat-lon').textContent = `${state.latitude.toFixed(6)}° N, ${Math.abs(state.longitude).toFixed(6)}° W`;
-      document.getElementById('location-name-display').textContent = `${state.location.road} • ${state.location.cityState}`;
-      document.getElementById('coords-alt-ft').textContent = Math.round(state.altitudeFt);
-      document.getElementById('coords-alt-m').textContent = state.altitudeM.toFixed(1);
-      document.getElementById('accuracy-display').textContent = `±${state.accuracyM.toFixed(1)} M`;
-
-      // Vault
+      // Vault Synchronizer
       document.getElementById('currentLatitude').textContent = state.latitude.toFixed(6);
       document.getElementById('currentLongitude').textContent = state.longitude.toFixed(6);
       document.getElementById('currentAltitudeMeters').textContent = state.altitudeM.toFixed(1);
@@ -511,64 +847,407 @@
       document.getElementById('gpsTimestamp').textContent = Date.now();
     }
 
+    // High Precision Telemetry Ingestion Engine
     let lastAlt = 14.5;
-    let lastTime = Date.now();
-    function ingestTelemetry(lat, lon, altM, speedMps, headingDeg, accuracyM) {
+    let lastPositionTime = Date.now();
+    let lastValidPos = null;
+
+    function ingestTelemetry(lat, lon, altM, speedMps, headingDeg, accuracyM, isIp = false) {
+      if (state.hasRealGpsLock && isIp) return;
+
       const now = Date.now();
-      const dt = Math.max(0.1, (now - lastTime) / 1000);
-      const effectiveAlt = altM ?? lastAlt;
+      const dt = Math.max(0.1, (now - lastPositionTime) / 1000);
+      lastPositionTime = now;
+
+      if (!isIp) {
+        state.hasRealGpsLock = true;
+        state.locationSource = 'GPS';
+      } else {
+        state.locationSource = 'WIFI_IP';
+      }
+
+      const effectiveAlt = (altM !== null && altM !== undefined && !isNaN(altM)) ? altM : lastAlt;
       const vertSpeed = (effectiveAlt - lastAlt) / dt;
       lastAlt = effectiveAlt;
-      lastTime = now;
 
-      // Stationary Deadband Clamp (< 1.8 MPH)
-      const rawMps = Math.max(0, speedMps ?? 0);
-      const clampedMps = rawMps < 0.804 ? 0 : rawMps;
-      const mph = clampedMps * 2.23694;
-      const kmh = clampedMps * 3.6;
+      // Speed Calculation & Stationary Noise Filter
+      let measuredSpeedMps = 0;
+      if (speedMps !== null && speedMps !== undefined && !isNaN(speedMps) && speedMps >= 0) {
+        measuredSpeedMps = speedMps;
+      } else if (lastValidPos && !isIp) {
+        const dMeters = distanceMeters(lat, lon, lastValidPos.lat, lastValidPos.lon);
+        // Only calculate synthetic speed if displacement clearly exceeds the GPS accuracy radius
+        const minNoiseRadius = Math.max(7.0, (accuracyM || 5) * 0.75);
+        if (dMeters > minNoiseRadius && dt >= 1.0) {
+          measuredSpeedMps = Math.min(70, dMeters / dt);
+        } else {
+          measuredSpeedMps = 0;
+        }
+      }
+
+      // Hard Stationary Zero-Clamp Deadband (< 1.8 MPH / 0.804 m/s)
+      let clampedMps = measuredSpeedMps;
+      const rawMph = clampedMps * 2.23694;
+      if (rawMph < 1.8) {
+        clampedMps = 0;
+      } else if (accuracyM && accuracyM > 20 && rawMph < 2.5) {
+        clampedMps = 0;
+      }
+
+      const finalMph = clampedMps * 2.23694;
+      const finalKmh = clampedMps * 3.6;
+
+      // Bearing Resolution & Sensor Fusion
+      let resolvedHeading = state.headingDeg;
+      let headingSource = state.headingSource;
+
+      if (clampedMps > 1.1) {
+        // Vehicle in motion: Prioritize GNSS track
+        if (headingDeg !== null && headingDeg !== undefined && !isNaN(headingDeg) && headingDeg >= 0) {
+          resolvedHeading = headingDeg;
+          headingSource = 'GNSS COURSE';
+        } else if (lastValidPos && distanceMeters(lat, lon, lastValidPos.lat, lastValidPos.lon) > 8.0) {
+          resolvedHeading = calculateBearingDegrees(lastValidPos.lat, lastValidPos.lon, lat, lon);
+          headingSource = 'GNSS AZIMUTH';
+        }
+      } else {
+        // Vehicle stationary: Preserve previous course or let magnetometer guide
+        if (window.hardwareCompassHeading !== undefined && window.hardwareCompassHeading !== null) {
+          resolvedHeading = window.hardwareCompassHeading;
+          headingSource = 'MAGNETOMETER';
+        } else {
+          headingSource = 'STATIONARY LOCK';
+        }
+      }
+
+      const constrainedAxis = calculateConstrainedDirection(resolvedHeading, state.location.road);
 
       state.latitude = lat;
       state.longitude = lon;
       state.altitudeM = effectiveAlt;
       state.altitudeFt = effectiveAlt * 3.28084;
       state.verticalSpeedMps = vertSpeed;
-      state.rawSpeedMps = rawMps;
-      state.clampedSpeedMph = mph;
-      state.clampedSpeedKmh = kmh;
-      state.speedStatus = clampedMps === 0 ? 'STOPPED' : mph < 25 ? 'SLOW' : mph < 55 ? 'CRUISING' : 'HIGHWAY';
-      state.headingDeg = headingDeg !== null && headingDeg >= 0 ? headingDeg : state.headingDeg;
-      state.headingCard = getCardinal(state.headingDeg);
-      state.accuracyM = accuracyM ?? 4.0;
+      state.rawSpeedMps = measuredSpeedMps;
+      state.clampedSpeedMph = finalMph;
+      state.clampedSpeedKmh = finalKmh;
+      state.speedStatus = clampedMps === 0 ? 'STOPPED' : finalMph < 25 ? 'SLOW' : finalMph < 55 ? 'CRUISING' : 'HIGHWAY';
+      state.headingDeg = resolvedHeading;
+      state.headingCard = getCardinal(resolvedHeading);
+      state.headingSource = headingSource;
+      state.corridorAxis = constrainedAxis;
+      state.isCorridorLocked = true;
+      state.accuracyM = accuracyM ?? (isIp ? 5000 : 4.0);
       state.location.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lon.toFixed(6)}`;
 
-      updateDOM();
-    }
-
-    // Geolocation
-    if ('geolocation' in navigator) {
-      navigator.geolocation.watchPosition(
-        pos => {
-          if (!state.isSimulating) {
-            ingestTelemetry(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude, pos.coords.speed, pos.coords.heading, pos.coords.accuracy);
-          }
-        },
-        null,
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
-      );
-    }
-
-    // Device Orientation
-    window.addEventListener('deviceorientation', e => {
-      if (state.isSimulating) return;
-      let heading = e.alpha ? (360 - e.alpha) % 360 : null;
-      if (e.webkitCompassHeading) heading = e.webkitCompassHeading;
-      if (heading !== null && state.rawSpeedMps < 2.0) {
-        state.headingDeg = heading;
-        state.headingCard = getCardinal(heading);
-        document.getElementById('compass-sensor-type').textContent = 'MAGNETOMETER';
-        updateDOM();
+      if (!isIp) {
+        lastValidPos = { lat, lon, time: now };
       }
-    }, true);
+
+      updateDOM();
+      reverseGeocodeLocation(lat, lon, false);
+
+      if (distanceMeters(lat, lon, lastWeatherLat, lastWeatherLon) > 4000) {
+        lastWeatherLat = lat;
+        lastWeatherLon = lon;
+        fetchWeather(lat, lon);
+      }
+    }
+
+    function calculateBearingDegrees(lat1, lon1, lat2, lon2) {
+      const p1 = lat1 * Math.PI / 180;
+      const p2 = lat2 * Math.PI / 180;
+      const dl = (lon2 - lon1) * Math.PI / 180;
+      const y = Math.sin(dl) * Math.cos(p2);
+      const x = Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl);
+      const theta = Math.atan2(y, x);
+      return (theta * 180 / Math.PI + 360) % 360;
+    }
+
+    function distanceMeters(lat1, lon1, lat2, lon2) {
+      if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) return 999999;
+      const R = 6371e3;
+      const p1 = lat1 * Math.PI / 180;
+      const p2 = lat2 * Math.PI / 180;
+      const dp = (lat2 - lat1) * Math.PI / 180;
+      const dl = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dp / 2) * Math.sin(dp / 2) +
+                Math.cos(p1) * Math.cos(p2) *
+                Math.sin(dl / 2) * Math.sin(dl / 2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    let isGeocoding = false;
+    let lastWeatherLat = null;
+    let lastWeatherLon = null;
+
+    async function reverseGeocodeLocation(lat, lon, force = false) {
+      const now = Date.now();
+      const dist = distanceMeters(lat, lon, state.lastGeocodedLat, state.lastGeocodedLon);
+
+      if (!force && (dist < 40 || now - state.lastGeocodedTime < 10000)) {
+        return;
+      }
+      if (isGeocoding) return;
+      isGeocoding = true;
+      state.lastGeocodedTime = now;
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&zoom=18&addressdetails=1`, {
+          signal: controller.signal,
+          headers: { 'Accept-Language': 'en' }
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          const addr = data.address || {};
+          
+          let road = addr.road || addr.highway || addr.motorway || addr.trunk || addr.primary || addr.secondary || addr.street || addr.pedestrian || (data.name && data.name !== addr.city ? data.name : null) || 'Corridor En Route';
+          road = abbreviateStreetName(road);
+
+          // Corridor directional alignment
+          const corridor = calculateConstrainedDirection(state.headingDeg, road);
+          if (corridor && (/^I-\d+/i.test(road) || /^(?:US|ROUTE)\s*\d+/i.test(road))) {
+            if (!road.toLowerCase().includes(corridor.toLowerCase())) {
+              road = `${road} ${corridor}`;
+            }
+          }
+
+          let city = addr.city || addr.town || addr.village || addr.municipality || addr.suburb || addr.hamlet || '';
+          let stateRaw = addr.state || addr.region || '';
+          let stateCode = US_STATES[stateRaw] || stateRaw;
+          let county = addr.county || '';
+          let postcode = addr.postcode || '';
+
+          state.location.road = road;
+          state.location.cityState = [city, stateCode].filter(Boolean).join(', ');
+          state.location.county = county;
+          state.location.zip = postcode;
+          state.lastGeocodedLat = lat;
+          state.lastGeocodedLon = lon;
+          updateDOM();
+          isGeocoding = false;
+          return;
+        }
+      } catch (err) {}
+
+      try {
+        const bRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat.toFixed(6)}&longitude=${lon.toFixed(6)}&localityLanguage=en`);
+        if (bRes.ok) {
+          const bData = await bRes.json();
+          let road = bData.localityInfo?.informative?.[0]?.name || bData.locality || 'Navigational Corridor';
+          road = abbreviateStreetName(road);
+          let city = bData.city || bData.locality || '';
+          let stateCode = bData.principalSubdivision || '';
+          let postcode = bData.postcode || '';
+
+          state.location.road = road;
+          state.location.cityState = [city, stateCode].filter(Boolean).join(', ');
+          state.location.zip = postcode;
+          state.lastGeocodedLat = lat;
+          state.lastGeocodedLon = lon;
+          updateDOM();
+        }
+      } catch (e) {}
+
+      isGeocoding = false;
+    }
+
+    // IP Geolocation Fallback (Fast 1.5s parallel runner)
+    async function fetchWifiIpLocation() {
+      if (state.hasRealGpsLock) return;
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.latitude && data.longitude) {
+            if (state.hasRealGpsLock) return;
+
+            const lat = parseFloat(data.latitude);
+            const lon = parseFloat(data.longitude);
+            const city = data.city || '';
+            const region = data.region || '';
+            const stateCode = US_STATES[region] || region;
+            const country = data.country || '';
+            const accuracy = parseFloat(data.accuracy || 20) * 1000;
+
+            ingestTelemetry(lat, lon, 14.5, 0, null, accuracy, true);
+            state.location.cityState = [city, stateCode].filter(Boolean).join(', ');
+            state.location.county = country;
+            updateDOM();
+            fetchWeather(lat, lon);
+            reverseGeocodeLocation(lat, lon, true);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const res2 = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client');
+        if (res2.ok) {
+          const d2 = await res2.json();
+          if (d2 && d2.latitude && d2.longitude) {
+            if (state.hasRealGpsLock) return;
+            const lat = parseFloat(d2.latitude);
+            const lon = parseFloat(d2.longitude);
+            ingestTelemetry(lat, lon, 14.5, 0, null, 15000, true);
+            const stateCode = US_STATES[d2.principalSubdivision] || d2.principalSubdivision || '';
+            state.location.cityState = [d2.city || d2.locality, stateCode].filter(Boolean).join(', ');
+            updateDOM();
+            fetchWeather(lat, lon);
+            reverseGeocodeLocation(lat, lon, true);
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Tracking Engine & Watchers
+    let watchPositionId = null;
+    let ipFallbackTimer = null;
+
+    // High Precision Multi-Stage Tracking Engine
+    function startTracking() {
+      // 1. IP Fallback Timer in parallel (fires if GPS takes > 1.5s)
+      if (ipFallbackTimer) clearTimeout(ipFallbackTimer);
+      ipFallbackTimer = setTimeout(() => {
+        if (!state.hasRealGpsLock) {
+          fetchWifiIpLocation();
+        }
+      }, 1500);
+
+      if (!('geolocation' in navigator)) {
+        fetchWifiIpLocation();
+        return;
+      }
+
+      // 2. Instantaneous Single-Shot Lock
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          if (ipFallbackTimer) clearTimeout(ipFallbackTimer);
+          ingestTelemetry(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude, pos.coords.speed, pos.coords.heading, pos.coords.accuracy, false);
+          reverseGeocodeLocation(pos.coords.latitude, pos.coords.longitude, true);
+          lastWeatherLat = pos.coords.latitude;
+          lastWeatherLon = pos.coords.longitude;
+          fetchWeather(pos.coords.latitude, pos.coords.longitude);
+        },
+        err => {
+          console.warn('Initial single-shot GNSS warning:', err.message);
+          fetchWifiIpLocation();
+        },
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 10000 }
+      );
+
+      // 3. Continuous Tracking with Graceful Fallback Escalation
+      try {
+        if (watchPositionId !== null) {
+          navigator.geolocation.clearWatch(watchPositionId);
+        }
+
+        watchPositionId = navigator.geolocation.watchPosition(
+          pos => {
+            if (ipFallbackTimer) clearTimeout(ipFallbackTimer);
+            ingestTelemetry(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude, pos.coords.speed, pos.coords.heading, pos.coords.accuracy, false);
+          },
+          error => {
+            console.warn('GPS High-Accuracy notice:', error.message);
+            // If high accuracy times out (desktop or deep indoors), gracefully degrade to standard accuracy
+            if (error.code === 2 || error.code === 3) {
+              if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+              }
+              watchPositionId = navigator.geolocation.watchPosition(
+                lowPos => {
+                  if (ipFallbackTimer) clearTimeout(ipFallbackTimer);
+                  ingestTelemetry(lowPos.coords.latitude, lowPos.coords.longitude, lowPos.coords.altitude, lowPos.coords.speed, lowPos.coords.heading, lowPos.coords.accuracy, false);
+                },
+                lowErr => {
+                  console.warn('GPS Standard Accuracy fallback notice:', lowErr.message);
+                  if (!state.hasRealGpsLock) {
+                    fetchWifiIpLocation();
+                  }
+                },
+                { enableHighAccuracy: false, maximumAge: 5000, timeout: 20000 }
+              );
+            } else if (error.code === 1) {
+              if (!state.hasRealGpsLock) {
+                fetchWifiIpLocation();
+              }
+            }
+          },
+          { enableHighAccuracy: true, maximumAge: 1500, timeout: 10000 }
+        );
+      } catch (e) {
+        fetchWifiIpLocation();
+      }
+    }
+
+    // Hardware Magnetometer / Gyroscope Fusion with 3D Tilt Compensation
+    window.hardwareCompassHeading = null;
+    function handleOrientationEvent(e) {
+      if (!e) return;
+      let trueMag = null;
+
+      if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+        // iOS Safari True Compass Heading directly in degrees
+        trueMag = (Number(e.webkitCompassHeading) % 360 + 360) % 360;
+      } else if (e.alpha !== null && !isNaN(e.alpha)) {
+        // W3C Android / standard orientation with tilt compensation
+        if (typeof e.beta === 'number' && typeof e.gamma === 'number' && (Math.abs(e.beta) > 6 || Math.abs(e.gamma) > 6)) {
+          const degToRad = Math.PI / 180;
+          const _x = e.beta * degToRad; // pitch
+          const _y = e.gamma * degToRad; // roll
+          const _z = e.alpha * degToRad; // yaw
+          const cX = Math.cos(_x), cY = Math.cos(_y), cZ = Math.cos(_z);
+          const sX = Math.sin(_x), sY = Math.sin(_y), sZ = Math.sin(_z);
+          const Vx = -cZ * sY - sZ * sX * cY;
+          const Vy = -sZ * sY + cZ * sX * cY;
+          let comp = Math.atan2(Vx, Vy) * (180 / Math.PI);
+          if (comp < 0) comp += 360;
+          const screenAngle = (window.screen?.orientation?.angle) ?? (window.orientation || 0);
+          trueMag = (comp + screenAngle + 360) % 360;
+        } else {
+          const screenAngle = (window.screen?.orientation?.angle) ?? (window.orientation || 0);
+          trueMag = ((360 - e.alpha) + screenAngle + 360) % 360;
+        }
+      }
+
+      if (trueMag !== null && !isNaN(trueMag)) {
+        window.hardwareCompassHeading = trueMag;
+        // When vehicle is stopped, compass is driven directly by hardware magnetometer
+        if (state.clampedSpeedMph <= 2.2) {
+          state.headingDeg = trueMag;
+          state.headingCard = getCardinal(trueMag);
+          state.headingSource = 'MAGNETOMETER';
+          state.corridorAxis = calculateConstrainedDirection(trueMag, state.location.road);
+          updateDOM();
+        }
+      }
+    }
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientationabsolute', handleOrientationEvent, { passive: true });
+      window.addEventListener('deviceorientation', handleOrientationEvent, { passive: true });
+    }
+
+    function requestOrientationPermission() {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(res => {
+          if (res === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientationEvent, { passive: true });
+            window.addEventListener('deviceorientationabsolute', handleOrientationEvent, { passive: true });
+          }
+        }).catch(() => {});
+      }
+    }
+    window.addEventListener('touchstart', requestOrientationPermission, { once: true, passive: true });
+    window.addEventListener('click', requestOrientationPermission, { once: true, passive: true });
 
     // Weather API (Open-Meteo)
     async function fetchWeather(lat, lon) {
@@ -588,72 +1267,75 @@
         state.weather.pressureHpa = Math.round(hpa * 10) / 10;
         state.weather.pressureInHg = Math.round(inHg * 100) / 100;
         state.weather.uv = cur.uv_index ?? 3.2;
-        state.weather.condition = cur.weather_code === 0 ? 'Clear Sky' : cur.weather_code < 3 ? 'Partly Cloudy' : cur.weather_code < 70 ? 'Rain/Showers' : 'Atmospheric';
+        state.weather.condition = cur.weather_code === 0 ? 'Clear Sky' : cur.weather_code < 3 ? 'Partly Cloudy' : cur.weather_code < 70 ? 'Showers' : 'Atmospheric';
         updateDOM();
       } catch (e) {}
     }
     fetchWeather(state.latitude, state.longitude);
 
-    // Simulation
-    let simTimer = null;
-    document.getElementById('btn-sim').addEventListener('click', () => {
-      state.isSimulating = !state.isSimulating;
-      playTone(1400);
-      const btn = document.getElementById('btn-sim');
-      if (state.isSimulating) {
-        btn.classList.add('active');
-        btn.textContent = 'SIM: ACTIVE';
-        let step = 0;
-        simTimer = setInterval(() => {
-          step++;
-          const h = (18.0 + Math.sin(step / 8) * 2.0 + 360) % 360;
-          const mph = 68.5 + Math.sin(step / 5) * 5.0;
-          const mps = mph / 2.23694;
-          ingestTelemetry(state.latitude + 0.0001, state.longitude + 0.00005, state.altitudeM + Math.sin(step / 10) * 0.3, mps, h, 2.5);
-        }, 1000);
+    // Tap Interactions for Blocks
+    document.getElementById('block-location').addEventListener('click', () => {
+      playTone(1300);
+      if (state.latitude !== 0 || state.longitude !== 0) {
+        const coordsText = `${state.latitude.toFixed(6)}, ${state.longitude.toFixed(6)}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(state.location.googleMapsUrl || coordsText);
+        }
+        showToast('COORDINATES COPIED');
       } else {
-        btn.classList.remove('active');
-        btn.textContent = 'DRIVE SIM';
-        clearInterval(simTimer);
-        ingestTelemetry(state.latitude, state.longitude, state.altitudeM, 0, state.headingDeg, state.accuracyM);
+        showToast('ACQUIRING POSITION...');
       }
     });
 
-    // Interactive Tap Handlers
-    document.getElementById('speed-bubble').addEventListener('click', () => {
+    document.getElementById('block-motion').addEventListener('click', () => {
       playTone(1000);
       state.speedUnit = state.speedUnit === 'MPH' ? 'KM/H' : 'MPH';
       updateDOM();
     });
 
-    document.getElementById('weather-bubble').addEventListener('click', () => {
+    document.getElementById('block-weather').addEventListener('click', () => {
       playTone(1100);
       state.tempUnit = state.tempUnit === 'F' ? 'C' : 'F';
-      updateDOM();
-    });
-
-    document.getElementById('baro-bubble').addEventListener('click', () => {
-      playTone(1100);
       state.baroUnit = state.baroUnit === 'inHg' ? 'hPa' : 'inHg';
       updateDOM();
     });
 
-    document.getElementById('coords-bubble').addEventListener('click', () => {
-      playTone(1300);
-      navigator.clipboard.writeText(state.location.googleMapsUrl);
-      showToast('NAV LINK COPIED');
+    document.getElementById('block-time').addEventListener('click', () => {
+      playTone(1200);
+      showToast('LOCAL TIME SYNCED');
+    });
+
+    document.getElementById('block-philosophy').addEventListener('click', () => {
+      playTone(1500);
+      fetchPhilosophicalFact();
     });
 
     document.getElementById('btn-audio').addEventListener('click', () => {
       state.soundEnabled = !state.soundEnabled;
       const btn = document.getElementById('btn-audio');
       btn.textContent = state.soundEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
-      btn.className = 'btn-top ' + (state.soundEnabled ? 'active' : '');
+      btn.className = 'btn-ctrl ' + (state.soundEnabled ? 'active' : '');
       if (state.soundEnabled) playTone(1200);
     });
 
+    // Screen Wake Lock
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    }
+    requestWakeLock();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+
+    // Boot
+    startTracking();
     updateDOM();
-    hydrateNomadMergeTags();
+    renderPhilosophy();
   </script>
 </body>
 </html>

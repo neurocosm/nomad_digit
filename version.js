@@ -24,9 +24,9 @@ function getEasternBuildString() {
   }
 }
 
-export const NOMAD_VERSION_INFO = {
-  appName: 'NOMAD: Hyperspace',
-  appNameLegacy: 'NOMAD: RoadTrip',
+const NOMAD_VERSION_INFO = {
+  appName: 'NOMAD: DIGIT',
+  appNameLegacy: 'NOMAD: Hyperspace',
   versionNumber: '4.0.0',
   buildVersion: getEasternBuildString(),
   creator: 'BostonyFX',
@@ -44,7 +44,7 @@ export const NOMAD_VERSION_INFO = {
   }
 };
 
-export function hydrateNomadMergeTags(rootElement = document) {
+function hydrateNomadMergeTags(rootElement = document) {
   if (typeof document === 'undefined') return;
 
   rootElement.querySelectorAll('.nomad-brand').forEach(el => {
@@ -92,4 +92,8 @@ if (typeof window !== 'undefined') {
   } else {
     hydrateNomadMergeTags();
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { NOMAD_VERSION_INFO, hydrateNomadMergeTags };
 }

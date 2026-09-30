@@ -1,1 +1,659 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>NOMAD: Hyperspace - Telemetry HUD</title>
+  <meta name="description" content="nomad_digit - text only telemetry HUD for mobilization by BostonyFX (@neurocosm)" />
+  <meta name="theme-color" content="#060b17" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #050811;
+      --bg-block: #0b1325;
+      --bg-block-hover: #101c36;
+      --border-color: rgba(0, 243, 255, 0.28);
+      --border-color-hover: rgba(0, 243, 255, 0.65);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --accent-cyan: #00f3ff;
+      --accent-cyan-dim: #0284c7;
+      --accent-green: #10b981;
+      --radius-pill-card: 26px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 16px 24px;
+      line-height: 1.35;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: 'tnum' on, 'zero' on;
+    }
+
+    /* Top Utility Bar */
+    .top-bar {
+      max-width: 580px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 2px 4px;
+    }
+
+    .top-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-top {
+      background: #0b1325;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-top:hover {
+      color: var(--text-main);
+      border-color: var(--border-color-hover);
+    }
+
+    .btn-top.active {
+      background: rgba(0, 243, 255, 0.16);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Vertical 5-Block Stack matching the user's sketch */
+    .hud-stack {
+      max-width: 580px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Rounded Rectangular Blocks */
+    .hud-card {
+      background: var(--bg-block);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-pill-card);
+      padding: 18px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 120px;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.2s, background-color 0.2s;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .hud-card:hover {
+      background: var(--bg-block-hover);
+      border-color: var(--border-color-hover);
+      transform: translateY(-1px);
+    }
+
+    .hud-card:active {
+      transform: scale(0.995);
+    }
+
+    .card-meta-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(0, 243, 255, 0.12);
+      border: 1px solid rgba(0, 243, 255, 0.35);
+      color: var(--accent-cyan);
+    }
+
+    .status-badge.stopped {
+      background: rgba(148, 163, 184, 0.1);
+      border-color: rgba(148, 163, 184, 0.3);
+      color: var(--text-muted);
+    }
+
+    .status-badge.locked {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--accent-green);
+    }
+
+    /* Center Content Display */
+    .card-center-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+
+    .card-hero-val {
+      font-size: 3.4rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text-main);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .card-hero-val .unit {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .card-secondary-val {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    /* Subtitle / Footer info in each card */
+    .card-meta-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+
+    .toast-pill {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-green);
+      color: #022c22;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      display: none;
+      z-index: 100;
+    }
+
+    .footer-credits {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .footer-credits a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Non-rendered DOM Telemetry Vault -->
+  <div class="hidden-telemetry-vault" style="display:none;" aria-hidden="true">
+    <span id="currentLatitude">42.360100</span>
+    <span id="currentLongitude">-71.058900</span>
+    <span id="currentAltitudeMeters">14.5</span>
+    <span id="currentAltitudeFeet">47.6</span>
+    <span id="currentHeadingDegrees">18.0</span>
+    <span id="currentHeadingCardinal">NNE</span>
+    <span id="rawSpeedMps">0.00</span>
+    <span id="clampedSpeedMph">0.0</span>
+    <span id="clampedSpeedKmh">0.0</span>
+    <span id="gpsAccuracyMeters">4.0</span>
+    <span id="gpsTimestamp">0</span>
+  </div>
+
+  <!-- Top Utilities -->
+  <div class="top-bar">
+    <div class="top-title nomad-brand">NOMAD: Hyperspace</div>
+    <div class="top-actions">
+      <button id="btn-sim" class="btn-top" title="Toggle Highway Driving Simulator">DRIVE SIM</button>
+      <button id="btn-audio" class="btn-top active" title="Audio Tones">AUDIO: ON</button>
+    </div>
+  </div>
+
+  <!-- 5 Horizontal Stacked Rounded Blocks -->
+  <div class="hud-stack">
+
+    <!-- BLOCK 1: Speed Telemetry Object (#speed-bubble) -->
+    <div id="speed-bubble" class="hud-card" title="Tap to toggle MPH / KM/H">
+      <div class="card-meta-top">
+        <span>01 // SPEED TELEMETRY</span>
+        <span id="speed-status-badge" class="status-badge stopped">STOPPED</span>
+      </div>
+      <div class="card-center-row">
+        <div class="card-hero-val font-mono">
+          <span id="speed-display">0.0</span>
+          <span id="speed-unit-display" class="unit">MPH</span>
+        </div>
+        <div class="card-secondary-val font-mono">
+          <span id="raw-speed-display" style="font-size: 0.95rem; color: var(--text-dim);">0.00 m/s</span>
+        </div>
+      </div>
+      <div class="card-meta-bottom">
+        <span>DEADBAND: &lt; 1.8 MPH CLAMP</span>
+        <span>TAP TO TOGGLE MPH / KM/H</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 2: Compass & Bearing Telemetry Object (#cmps-bubble) -->
+    <div id="cmps-bubble" class="hud-card" title="Tap to calibrate orientation">
+      <div class="card-meta-top">
+        <span>02 // BEARING & CORRIDOR AXIS</span>
+        <span id="corridor-axis-badge" class="status-badge locked">NORTHBOUND</span>
+      </div>
+      <div class="card-center-row">
+        <div class="card-hero-val font-mono">
+          <span id="heading-cardinal-display">NNE</span>
+          <span id="heading-degrees-display" class="unit">018°</span>
+        </div>
+        <div class="card-secondary-val font-mono">
+          <span id="corridor-lock-text" style="color: var(--accent-cyan); font-size: 0.95rem;">I-95 AXIS LOCKED</span>
+        </div>
+      </div>
+      <div class="card-meta-bottom">
+        <span>HYSTERESIS: ±15° DEADBAND</span>
+        <span id="compass-sensor-type">GNSS COURSE</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 3: Weather & Temperature Telemetry Object (#weather-bubble) -->
+    <div id="weather-bubble" class="hud-card" title="Tap to toggle °F / °C">
+      <div class="card-meta-top">
+        <span>03 // AMBIENT WEATHER</span>
+        <span id="humidity-display" class="status-badge">46% RH</span>
+      </div>
+      <div class="card-center-row">
+        <div class="card-hero-val font-mono">
+          <span id="temp-display">72.4</span>
+          <span id="temp-unit-display" class="unit">°F</span>
+        </div>
+        <div class="card-secondary-val">
+          <span id="weather-condition-display" style="color: var(--text-main); font-size: 1.15rem;">Clear Sky</span>
+        </div>
+      </div>
+      <div class="card-meta-bottom">
+        <span>OPEN-METEO 10M CACHE</span>
+        <span>TAP TO TOGGLE °F / °C</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 4: Barometric Pressure Telemetry Object (#baro-bubble) -->
+    <div id="baro-bubble" class="hud-card" title="Tap to toggle inHg / hPa">
+      <div class="card-meta-top">
+        <span>04 // BAROMETRIC PRESSURE</span>
+        <span id="baro-trend-badge" class="status-badge">STEADY</span>
+      </div>
+      <div class="card-center-row">
+        <div class="card-hero-val font-mono">
+          <span id="baro-display">29.92</span>
+          <span id="baro-unit-display" class="unit">inHg</span>
+        </div>
+        <div class="card-secondary-val font-mono">
+          <span id="baro-hpa-display" style="font-size: 1.05rem; color: var(--text-muted);">1013.2 hPa</span>
+        </div>
+      </div>
+      <div class="card-meta-bottom">
+        <span>UV INDEX: <strong id="uv-display" style="color:var(--text-main);">3.2</strong></span>
+        <span>TAP TO TOGGLE inHg / hPa</span>
+      </div>
+    </div>
+
+    <!-- BLOCK 5: Coordinates & Navigation Telemetry Object (#coords-bubble) -->
+    <div id="coords-bubble" class="hud-card" title="Tap to copy coordinates & navigation link">
+      <div class="card-meta-top">
+        <span>05 // GEOSPATIAL POSITION & ELEVATION</span>
+        <span class="status-badge">WGS84 6-DEC</span>
+      </div>
+      <div class="card-center-row" style="margin: 6px 0;">
+        <div style="display: flex; flex-direction: column;">
+          <div style="font-size: 1.05rem; font-weight: 700; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;" id="coords-lat-lon">
+            42.360100° N, 71.058900° W
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="location-name-display">
+            I-95 North Corridor • Boston, MA
+          </div>
+        </div>
+        <div class="card-secondary-val font-mono" style="text-align: right;">
+          <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);"><span id="coords-alt-ft">48</span> FT MSL</div>
+          <div style="font-size: 0.78rem; color: var(--text-dim);"><span id="coords-alt-m">14.5</span> M</div>
+        </div>
+      </div>
+      <div class="card-meta-bottom">
+        <span>ACCURACY: <span id="accuracy-display">±4.0 M</span></span>
+        <span style="color: var(--accent-cyan);">TAP TO COPY NAV LINK</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Credits -->
+  <footer class="footer-credits nomad-footer">
+    NOMAD: Hyperspace Navigation Dashboard • Crafted by BostonyFX
+  </footer>
+
+  <div id="toast-pill" class="toast-pill">COPIED TO CLIPBOARD</div>
+
+  <script type="module" src="/version.js"></script>
+  <script type="module">
+    import { NOMAD_VERSION_INFO, hydrateNomadMergeTags } from '/version.js';
+
+    const state = {
+      speedUnit: 'MPH',
+      tempUnit: 'F',
+      baroUnit: 'inHg',
+      rawSpeedMps: 0,
+      clampedSpeedMph: 0,
+      clampedSpeedKmh: 0,
+      speedStatus: 'STOPPED',
+      latitude: 42.3601,
+      longitude: -71.0589,
+      altitudeM: 14.5,
+      altitudeFt: 47.6,
+      verticalSpeedMps: 0,
+      headingDeg: 18.0,
+      headingCard: 'NNE',
+      corridorAxis: 'North',
+      isCorridorLocked: true,
+      accuracyM: 4.0,
+      isSimulating: false,
+      soundEnabled: true,
+      weather: {
+        tempF: 72.4,
+        tempC: 22.4,
+        condition: 'Clear Sky',
+        humidity: 46,
+        pressureInHg: 29.92,
+        pressureHpa: 1013.2,
+        trend: 'Steady',
+        uv: 3.2,
+      },
+      location: {
+        road: 'I-95 North Corridor',
+        cityState: 'Boston, MA',
+        countyZip: 'Suffolk County • 02108',
+        googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=42.360100,-71.058900'
+      }
+    };
+
+    let audioCtx = null;
+    function playTone(freq = 1200) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch (e) {}
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast-pill');
+      toast.textContent = text;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 1800);
+    }
+
+    function getCardinal(deg) {
+      const dir = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      return dir[Math.round(((deg % 360 + 360) % 360) / 22.5) % 16];
+    }
+
+    function updateDOM() {
+      // 1. Speed
+      const speedVal = state.speedUnit === 'MPH' ? state.clampedSpeedMph : state.clampedSpeedKmh;
+      document.getElementById('speed-display').textContent = speedVal.toFixed(1);
+      document.getElementById('speed-unit-display').textContent = state.speedUnit;
+      document.getElementById('raw-speed-display').textContent = `${state.rawSpeedMps.toFixed(2)} m/s`;
+      
+      const speedBadge = document.getElementById('speed-status-badge');
+      speedBadge.textContent = state.speedStatus;
+      speedBadge.className = 'status-badge ' + (state.speedStatus === 'STOPPED' ? 'stopped' : 'locked');
+
+      // 2. Compass & Corridor
+      document.getElementById('heading-cardinal-display').textContent = state.headingCard;
+      document.getElementById('heading-degrees-display').textContent = Math.round(state.headingDeg).toString().padStart(3, '0') + '°';
+      document.getElementById('corridor-axis-badge').textContent = state.isCorridorLocked ? `${state.corridorAxis.toUpperCase()}BOUND` : 'OPEN GRID';
+      document.getElementById('corridor-lock-text').textContent = state.isCorridorLocked ? 'I-95 AXIS LOCKED' : 'UNCONSTRAINED';
+
+      // 3. Weather
+      const tempVal = state.tempUnit === 'F' ? state.weather.tempF : state.weather.tempC;
+      document.getElementById('temp-display').textContent = tempVal.toFixed(1);
+      document.getElementById('temp-unit-display').textContent = `°${state.tempUnit}`;
+      document.getElementById('weather-condition-display').textContent = state.weather.condition;
+      document.getElementById('humidity-display').textContent = `${state.weather.humidity}% RH`;
+
+      // 4. Barometer
+      const baroVal = state.baroUnit === 'inHg' ? state.weather.pressureInHg.toFixed(2) : state.weather.pressureHpa.toFixed(1);
+      document.getElementById('baro-display').textContent = baroVal;
+      document.getElementById('baro-unit-display').textContent = state.baroUnit;
+      document.getElementById('baro-hpa-display').textContent = `${state.weather.pressureHpa.toFixed(1)} hPa`;
+      document.getElementById('baro-trend-badge').textContent = state.weather.trend.toUpperCase();
+      document.getElementById('uv-display').textContent = state.weather.uv;
+
+      // 5. Coordinates & Location
+      document.getElementById('coords-lat-lon').textContent = `${state.latitude.toFixed(6)}° N, ${Math.abs(state.longitude).toFixed(6)}° W`;
+      document.getElementById('location-name-display').textContent = `${state.location.road} • ${state.location.cityState}`;
+      document.getElementById('coords-alt-ft').textContent = Math.round(state.altitudeFt);
+      document.getElementById('coords-alt-m').textContent = state.altitudeM.toFixed(1);
+      document.getElementById('accuracy-display').textContent = `±${state.accuracyM.toFixed(1)} M`;
+
+      // Vault
+      document.getElementById('currentLatitude').textContent = state.latitude.toFixed(6);
+      document.getElementById('currentLongitude').textContent = state.longitude.toFixed(6);
+      document.getElementById('currentAltitudeMeters').textContent = state.altitudeM.toFixed(1);
+      document.getElementById('currentAltitudeFeet').textContent = state.altitudeFt.toFixed(1);
+      document.getElementById('currentHeadingDegrees').textContent = state.headingDeg.toFixed(1);
+      document.getElementById('currentHeadingCardinal').textContent = state.headingCard;
+      document.getElementById('rawSpeedMps').textContent = state.rawSpeedMps.toFixed(2);
+      document.getElementById('clampedSpeedMph').textContent = state.clampedSpeedMph.toFixed(1);
+      document.getElementById('clampedSpeedKmh').textContent = state.clampedSpeedKmh.toFixed(1);
+      document.getElementById('gpsAccuracyMeters').textContent = state.accuracyM.toFixed(1);
+      document.getElementById('gpsTimestamp').textContent = Date.now();
+    }
+
+    let lastAlt = 14.5;
+    let lastTime = Date.now();
+    function ingestTelemetry(lat, lon, altM, speedMps, headingDeg, accuracyM) {
+      const now = Date.now();
+      const dt = Math.max(0.1, (now - lastTime) / 1000);
+      const effectiveAlt = altM ?? lastAlt;
+      const vertSpeed = (effectiveAlt - lastAlt) / dt;
+      lastAlt = effectiveAlt;
+      lastTime = now;
+
+      // Stationary Deadband Clamp (< 1.8 MPH)
+      const rawMps = Math.max(0, speedMps ?? 0);
+      const clampedMps = rawMps < 0.804 ? 0 : rawMps;
+      const mph = clampedMps * 2.23694;
+      const kmh = clampedMps * 3.6;
+
+      state.latitude = lat;
+      state.longitude = lon;
+      state.altitudeM = effectiveAlt;
+      state.altitudeFt = effectiveAlt * 3.28084;
+      state.verticalSpeedMps = vertSpeed;
+      state.rawSpeedMps = rawMps;
+      state.clampedSpeedMph = mph;
+      state.clampedSpeedKmh = kmh;
+      state.speedStatus = clampedMps === 0 ? 'STOPPED' : mph < 25 ? 'SLOW' : mph < 55 ? 'CRUISING' : 'HIGHWAY';
+      state.headingDeg = headingDeg !== null && headingDeg >= 0 ? headingDeg : state.headingDeg;
+      state.headingCard = getCardinal(state.headingDeg);
+      state.accuracyM = accuracyM ?? 4.0;
+      state.location.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lon.toFixed(6)}`;
+
+      updateDOM();
+    }
+
+    // Geolocation
+    if ('geolocation' in navigator) {
+      navigator.geolocation.watchPosition(
+        pos => {
+          if (!state.isSimulating) {
+            ingestTelemetry(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude, pos.coords.speed, pos.coords.heading, pos.coords.accuracy);
+          }
+        },
+        null,
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      );
+    }
+
+    // Device Orientation
+    window.addEventListener('deviceorientation', e => {
+      if (state.isSimulating) return;
+      let heading = e.alpha ? (360 - e.alpha) % 360 : null;
+      if (e.webkitCompassHeading) heading = e.webkitCompassHeading;
+      if (heading !== null && state.rawSpeedMps < 2.0) {
+        state.headingDeg = heading;
+        state.headingCard = getCardinal(heading);
+        document.getElementById('compass-sensor-type').textContent = 'MAGNETOMETER';
+        updateDOM();
+      }
+    }, true);
+
+    // Weather API (Open-Meteo)
+    async function fetchWeather(lat, lon) {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,relative_humidity_2m,surface_pressure,weather_code,uv_index`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const cur = data.current || {};
+        const c = cur.temperature_2m ?? 22.0;
+        const f = (c * 9) / 5 + 32;
+        const hpa = cur.surface_pressure ?? 1013.2;
+        const inHg = hpa * 0.02953;
+
+        state.weather.tempC = Math.round(c * 10) / 10;
+        state.weather.tempF = Math.round(f * 10) / 10;
+        state.weather.humidity = Math.round(cur.relative_humidity_2m ?? 46);
+        state.weather.pressureHpa = Math.round(hpa * 10) / 10;
+        state.weather.pressureInHg = Math.round(inHg * 100) / 100;
+        state.weather.uv = cur.uv_index ?? 3.2;
+        state.weather.condition = cur.weather_code === 0 ? 'Clear Sky' : cur.weather_code < 3 ? 'Partly Cloudy' : cur.weather_code < 70 ? 'Rain/Showers' : 'Atmospheric';
+        updateDOM();
+      } catch (e) {}
+    }
+    fetchWeather(state.latitude, state.longitude);
+
+    // Simulation
+    let simTimer = null;
+    document.getElementById('btn-sim').addEventListener('click', () => {
+      state.isSimulating = !state.isSimulating;
+      playTone(1400);
+      const btn = document.getElementById('btn-sim');
+      if (state.isSimulating) {
+        btn.classList.add('active');
+        btn.textContent = 'SIM: ACTIVE';
+        let step = 0;
+        simTimer = setInterval(() => {
+          step++;
+          const h = (18.0 + Math.sin(step / 8) * 2.0 + 360) % 360;
+          const mph = 68.5 + Math.sin(step / 5) * 5.0;
+          const mps = mph / 2.23694;
+          ingestTelemetry(state.latitude + 0.0001, state.longitude + 0.00005, state.altitudeM + Math.sin(step / 10) * 0.3, mps, h, 2.5);
+        }, 1000);
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = 'DRIVE SIM';
+        clearInterval(simTimer);
+        ingestTelemetry(state.latitude, state.longitude, state.altitudeM, 0, state.headingDeg, state.accuracyM);
+      }
+    });
+
+    // Interactive Tap Handlers
+    document.getElementById('speed-bubble').addEventListener('click', () => {
+      playTone(1000);
+      state.speedUnit = state.speedUnit === 'MPH' ? 'KM/H' : 'MPH';
+      updateDOM();
+    });
+
+    document.getElementById('weather-bubble').addEventListener('click', () => {
+      playTone(1100);
+      state.tempUnit = state.tempUnit === 'F' ? 'C' : 'F';
+      updateDOM();
+    });
+
+    document.getElementById('baro-bubble').addEventListener('click', () => {
+      playTone(1100);
+      state.baroUnit = state.baroUnit === 'inHg' ? 'hPa' : 'inHg';
+      updateDOM();
+    });
+
+    document.getElementById('coords-bubble').addEventListener('click', () => {
+      playTone(1300);
+      navigator.clipboard.writeText(state.location.googleMapsUrl);
+      showToast('NAV LINK COPIED');
+    });
+
+    document.getElementById('btn-audio').addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      const btn = document.getElementById('btn-audio');
+      btn.textContent = state.soundEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
+      btn.className = 'btn-top ' + (state.soundEnabled ? 'active' : '');
+      if (state.soundEnabled) playTone(1200);
+    });
+
+    updateDOM();
+    hydrateNomadMergeTags();
+  </script>
+</body>
+</html>

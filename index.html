@@ -261,18 +261,39 @@
       line-height: 1;
     }
 
-    /* Philosophy Quote Styling */
+    /* Philosophy Quote Styling & Dynamic Vertical Overflow Viewport */
+    .phil-quote-viewport {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
     .phil-quote-text {
-      font-size: clamp(0.74rem, 1.9vh, 0.86rem);
+      display: block;
+      width: 100%;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      font-size: clamp(0.70rem, 1.8vh, 0.80rem);
       font-weight: 500;
-      line-height: 1.28;
+      line-height: 1.30;
       color: #e2e8f0;
       font-style: italic;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin: 2px 0;
+      will-change: transform;
+      transform: translateY(0);
+      text-align: left;
+    }
+
+    .phil-quote-viewport.has-overflow {
+      align-items: flex-start;
+      mask-image: linear-gradient(to bottom, transparent 0px, black 6px, black calc(100% - 6px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 6px, black calc(100% - 6px), transparent 100%);
     }
 
     .phil-author {
@@ -282,6 +303,10 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 65%;
     }
 
     /* Toast Notification */
@@ -481,18 +506,18 @@
     </div>
 
     <!-- BLOCK 5: Philosophical Insight / API -->
-    <div id="block-philosophy" class="rounded-block" title="Tap to fetch next philosophical insight">
+    <div id="block-philosophy" class="rounded-block" title="Tap to refresh quote">
       <div class="block-meta-top">
-        <span>05 // PHILOSOPHICAL COGNITION</span>
-        <span id="phil-status-badge" class="block-badge">PHILOSOPHY API</span>
+        <span>05 // COGNITION &amp; PERSPECTIVE</span>
+        <span id="phil-status-badge" class="block-badge">DAILY QUOTE API</span>
       </div>
-      <div style="margin: 2px 0;">
+      <div class="phil-quote-viewport" id="phil-quote-viewport">
         <div id="phil-quote" class="phil-quote-text">
-          "The soul becomes dyed with the color of its thoughts."
+          Syncing Daily API Insight...
         </div>
       </div>
       <div class="block-meta-bottom">
-        <span id="phil-author" class="phil-author">— Marcus Aurelius</span>
+        <span id="phil-author" class="phil-author">— ...</span>
         <span style="color: var(--accent-cyan); font-weight: 600;">TAP: REFRESH</span>
       </div>
     </div>
@@ -597,58 +622,201 @@
         googleMapsUrl: ''
       },
       philosophy: {
-        quote: 'The soul becomes dyed with the color of its thoughts.',
-        author: 'Marcus Aurelius'
+        quote: 'Syncing Daily API Insight...',
+        author: ''
       }
     };
 
-    // Philosophy corpus
-    const fallbackQuotes = [
-      { quote: 'The soul becomes dyed with the color of its thoughts.', author: 'Marcus Aurelius' },
-      { quote: 'We suffer more often in imagination than in reality.', author: 'Seneca' },
-      { quote: 'He who has a why to live can bear almost any how.', author: 'Friedrich Nietzsche' },
-      { quote: 'The journey of a thousand miles begins with a single step.', author: 'Lao Tzu' },
-      { quote: 'Nature does not hurry, yet everything is accomplished.', author: 'Lao Tzu' },
-      { quote: 'Muddy water is best cleared by leaving it alone.', author: 'Alan Watts' },
-      { quote: 'You are an aperture through which the universe is looking at itself.', author: 'Alan Watts' },
-      { quote: 'In the depth of winter, I finally learned that within me there lay an invincible summer.', author: 'Albert Camus' },
-      { quote: 'Happiness is the meaning and the purpose of life, the whole aim of human existence.', author: 'Aristotle' },
-      { quote: 'Freedom is what you do with what’s been done to you.', author: 'Jean-Paul Sartre' },
-      { quote: 'Wonder is the beginning of wisdom.', author: 'Socrates' },
-      { quote: 'Peace comes from within. Do not seek it without.', author: 'Gautama Buddha' }
-    ];
+    // Daily Quote Engine (All Categories • Once per Day via API • Zero Hardcoded Fallbacks)
+    function getTodayDateKey() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
 
-    let quoteIndex = 0;
-    async function fetchPhilosophicalFact() {
-      const badge = document.getElementById('phil-status-badge');
-      if (badge) badge.textContent = 'QUERYING...';
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500);
-        const res = await fetch('https://api.quotable.io/random?tags=philosophy|wisdom', { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const data = await res.json();
-          state.philosophy.quote = data.content;
-          state.philosophy.author = data.author;
-          if (badge) badge.textContent = 'PHILOSOPHY API';
-          renderPhilosophy();
-          return;
+    let quoteAnimation = null;
+
+    function applyQuoteOverflowScroll(quoteEl, viewportEl) {
+      if (quoteAnimation) {
+        quoteAnimation.cancel();
+        quoteAnimation = null;
+      }
+      quoteEl.style.transform = 'translateY(0)';
+      viewportEl.classList.remove('has-overflow');
+
+      // Allow DOM to settle multi-line word wrap before measuring vertical bounds
+      requestAnimationFrame(() => {
+        const textHeight = quoteEl.scrollHeight;
+        const viewportHeight = viewportEl.clientHeight;
+        const overflow = textHeight - viewportHeight;
+
+        // ONLY IF the paragraph breaches the vertical area of Block 05!
+        if (overflow > 4) {
+          viewportEl.classList.add('has-overflow');
+
+          // Reading cadence for multi-line paragraphs:
+          // 1. Initial pause at top: 3.2s so user can read first lines
+          // 2. Comfortable vertical drift reading speed: ~18 pixels per second
+          // 3. Pause at bottom: 2.6s so user finishes the conclusion
+          // 4. Smooth return glide back to top: ~1.2s
+          const initialPauseMs = 3200;
+          const endPauseMs = 2600;
+          const returnMs = 1200;
+          const scrollSpeedPxPerSec = 18;
+          const scrollDurationMs = Math.round((overflow / scrollSpeedPxPerSec) * 1000);
+          const totalDurationMs = initialPauseMs + scrollDurationMs + endPauseMs + returnMs;
+
+          const p1 = initialPauseMs / totalDurationMs;
+          const p2 = (initialPauseMs + scrollDurationMs) / totalDurationMs;
+          const p3 = (initialPauseMs + scrollDurationMs + endPauseMs) / totalDurationMs;
+
+          const keyframes = [
+            { transform: 'translateY(0px)', offset: 0 },
+            { transform: 'translateY(0px)', offset: p1, easing: 'ease-in-out' },
+            { transform: `translateY(-${overflow + 4}px)`, offset: p2 },
+            { transform: `translateY(-${overflow + 4}px)`, offset: p3, easing: 'ease-in-out' },
+            { transform: 'translateY(0px)', offset: 1.0 }
+          ];
+
+          quoteAnimation = quoteEl.animate(keyframes, {
+            duration: totalDurationMs,
+            iterations: Infinity
+          });
         }
-      } catch (e) {}
-
-      quoteIndex = (quoteIndex + 1) % fallbackQuotes.length;
-      state.philosophy = fallbackQuotes[quoteIndex];
-      if (badge) badge.textContent = 'PHILOSOPHY API';
-      renderPhilosophy();
+      });
     }
 
     function renderPhilosophy() {
       const quoteEl = document.getElementById('phil-quote');
       const authorEl = document.getElementById('phil-author');
-      if (quoteEl) quoteEl.textContent = `"${state.philosophy.quote}"`;
-      if (authorEl) authorEl.textContent = `— ${state.philosophy.author}`;
+      const viewportEl = document.getElementById('phil-quote-viewport');
+      if (!quoteEl || !viewportEl) return;
+
+      const rawQuote = state.philosophy.quote || '';
+      const rawAuthor = state.philosophy.author || 'Insight';
+
+      // Dynamic paragraph font sizing and line-height based on character volume
+      const len = rawQuote.length;
+      let fontSize = 'clamp(0.70rem, 1.8vh, 0.80rem)';
+      let lineHeight = 1.30;
+      if (len < 65) {
+        fontSize = 'clamp(0.78rem, 2.0vh, 0.88rem)';
+        lineHeight = 1.35;
+      } else if (len > 140) {
+        fontSize = 'clamp(0.64rem, 1.5vh, 0.72rem)';
+        lineHeight = 1.24;
+      }
+      quoteEl.style.fontSize = fontSize;
+      quoteEl.style.lineHeight = String(lineHeight);
+
+      quoteEl.textContent = `"${rawQuote}"`;
+      if (authorEl) authorEl.textContent = `— ${rawAuthor}`;
+
+      applyQuoteOverflowScroll(quoteEl, viewportEl);
     }
+
+    async function loadDailyQuote(forceRefresh = false) {
+      const badge = document.getElementById('phil-status-badge');
+      const todayKey = getTodayDateKey();
+
+      if (!forceRefresh) {
+        try {
+          const cachedDate = localStorage.getItem('nomad_daily_quote_date');
+          const cachedPayload = localStorage.getItem('nomad_daily_quote_payload');
+          if (cachedDate === todayKey && cachedPayload) {
+            const data = JSON.parse(cachedPayload);
+            if (data && data.quote) {
+              state.philosophy = data;
+              if (badge) badge.textContent = 'DAILY QUOTE API';
+              renderPhilosophy();
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (badge) badge.textContent = 'QUERYING API...';
+
+      let fetched = null;
+
+      // 1. Primary: DummyJSON Quotes (1400+ quotes across all categories, open CORS, 99.99% uptime)
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 3500);
+        const res = await fetch('https://dummyjson.com/quotes/random', { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (res.ok) {
+          const d = await res.json();
+          if (d && d.quote) {
+            fetched = {
+              quote: d.quote.trim(),
+              author: d.author ? d.author.trim() : 'Unknown'
+            };
+          }
+        }
+      } catch (e) {}
+
+      // 2. Secondary fallback: FavQs Quote of the Day
+      if (!fetched) {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 3500);
+          const res = await fetch('https://favqs.com/api/qotd', { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (res.ok) {
+            const d = await res.json();
+            if (d && d.quote && d.quote.body) {
+              fetched = {
+                quote: d.quote.body.trim(),
+                author: d.quote.author ? d.quote.author.trim() : 'Unknown'
+              };
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Tertiary fallback: Stoic Quote API
+      if (!fetched) {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 3500);
+          const res = await fetch('https://stoic.tekloon.net/stoic-quote', { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (res.ok) {
+            const d = await res.json();
+            if (d && d.data && d.data.quote) {
+              fetched = {
+                quote: d.data.quote.trim(),
+                author: d.data.author ? d.data.author.trim() : 'Philosopher'
+              };
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (fetched) {
+        state.philosophy = fetched;
+        try {
+          localStorage.setItem('nomad_daily_quote_date', todayKey);
+          localStorage.setItem('nomad_daily_quote_payload', JSON.stringify(fetched));
+        } catch (e) {}
+        if (badge) badge.textContent = 'DAILY QUOTE API';
+        renderPhilosophy();
+        if (forceRefresh) showToast('NEW QUOTE LOADED');
+      } else {
+        if (badge) badge.textContent = 'API RETRY...';
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      const quoteEl = document.getElementById('phil-quote');
+      const viewportEl = document.getElementById('phil-quote-viewport');
+      if (quoteEl && viewportEl) {
+        applyQuoteOverflowScroll(quoteEl, viewportEl);
+      }
+    });
 
     // Audio Engine
     let audioCtx = null;
@@ -1307,7 +1475,7 @@
 
     document.getElementById('block-philosophy').addEventListener('click', () => {
       playTone(1500);
-      fetchPhilosophicalFact();
+      loadDailyQuote(true);
     });
 
     document.getElementById('btn-audio').addEventListener('click', () => {
@@ -1335,7 +1503,7 @@
     // Boot
     startTracking();
     updateDOM();
-    renderPhilosophy();
+    loadDailyQuote(false);
   </script>
 </body>
 </html>

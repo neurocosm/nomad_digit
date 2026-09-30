@@ -1,6 +1,6 @@
 {
-  "version": "v1.09292026.2220",
-  "buildDate": "09292026",
-  "buildTimeEastern": "2220",
-  "releaseNotes": "Multi-line paragraph display with smart vertical overflow and PWA update beacon."
+  "version": "v1.09302026.1230",
+  "buildDate": "09302026",
+  "buildTimeEastern": "1230",
+  "releaseNotes": "Rebalanced Block 01 visual hierarchy: calibrated City & State to secondary scale with strict overflow prevention."
 }

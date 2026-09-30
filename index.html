@@ -325,6 +325,63 @@
       line-height: 1;
     }
 
+    /* Block 01 Location Content (Top Justified & Dynamic Sizing) */
+    .block-location-content {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* Justify TOP */
+      padding-top: 1px;
+      gap: 2px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .loc-street-name {
+      font-size: clamp(1.28rem, 3.25vh, 1.65rem);
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+      margin: 0;
+      padding: 0;
+      transition: font-size 0.15s ease;
+    }
+
+    /* City & State (Secondary hierarchy: distinct, clearly subordinate to street name) */
+    .loc-city-state {
+      font-size: clamp(0.86rem, 2.15vh, 1.00rem);
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      margin: 0;
+      padding: 0;
+      transition: font-size 0.15s ease;
+    }
+
+    /* County & Zip (Tertiary metadata: subtle slate styling) */
+    .loc-county-zip {
+      font-size: clamp(0.74rem, 1.85vh, 0.86rem);
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      margin: 0;
+      padding: 0;
+      transition: font-size 0.15s ease;
+    }
+
     /* Philosophy Quote Styling & Dynamic Vertical Overflow Viewport */
     .phil-quote-viewport {
       width: 100%;
@@ -344,14 +401,15 @@
       white-space: normal;
       word-wrap: break-word;
       overflow-wrap: break-word;
-      font-size: clamp(0.70rem, 1.8vh, 0.80rem);
+      font-size: clamp(0.76rem, 1.9vh, 0.92rem);
       font-weight: 500;
-      line-height: 1.30;
+      line-height: 1.28;
       color: #e2e8f0;
       font-style: italic;
       will-change: transform;
       transform: translateY(0);
       text-align: left;
+      transition: font-size 0.15s ease;
     }
 
     .phil-quote-viewport.has-overflow {
@@ -430,7 +488,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09292026.2220</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.1230</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Avionics Sound">AUDIO: ON</button>
     </div>
@@ -445,12 +503,15 @@
         <span>01 // LOCATION &amp; COORDINATES</span>
         <span id="corridor-axis-badge" class="block-badge stopped">SEEKING SIGNAL...</span>
       </div>
-      <div style="margin: 1px 0; min-width: 0;">
-        <div id="street-name" style="font-size: clamp(0.92rem, 2.3vh, 1.12rem); font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <div id="block-location-content" class="block-location-content">
+        <div id="street-name" class="loc-street-name">
           Resolving Location...
         </div>
-        <div id="city-state-county" style="font-size: clamp(0.68rem, 1.7vh, 0.78rem); color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-          Triangulating GNSS &amp; Wi-Fi Network
+        <div id="city-state" class="loc-city-state">
+          Triangulating Position...
+        </div>
+        <div id="county-zip" class="loc-county-zip">
+          GNSS &amp; Wi-Fi Network
         </div>
       </div>
       <div class="block-meta-bottom">
@@ -759,27 +820,73 @@
       const viewportEl = document.getElementById('phil-quote-viewport');
       if (!quoteEl || !viewportEl) return;
 
-      const rawQuote = state.philosophy.quote || '';
-      const rawAuthor = state.philosophy.author || 'Insight';
-
-      // Dynamic paragraph font sizing and line-height based on character volume
-      const len = rawQuote.length;
-      let fontSize = 'clamp(0.70rem, 1.8vh, 0.80rem)';
-      let lineHeight = 1.30;
-      if (len < 65) {
-        fontSize = 'clamp(0.78rem, 2.0vh, 0.88rem)';
-        lineHeight = 1.35;
-      } else if (len > 140) {
-        fontSize = 'clamp(0.64rem, 1.5vh, 0.72rem)';
-        lineHeight = 1.24;
-      }
-      quoteEl.style.fontSize = fontSize;
-      quoteEl.style.lineHeight = String(lineHeight);
+      const rawQuote = (state.philosophy.quote || '').trim();
+      const rawAuthor = (state.philosophy.author || 'Insight').trim();
 
       quoteEl.textContent = `"${rawQuote}"`;
       if (authorEl) authorEl.textContent = `— ${rawAuthor}`;
 
-      applyQuoteOverflowScroll(quoteEl, viewportEl);
+      // 1. Pre-parse quote metrics for length and structure
+      const charLen = rawQuote.length;
+
+      // 2. Intelligent initial target sizing based on length brackets
+      // Sized to commandingly take up the block space rather than sitting tiny
+      let initialFontSizeRem;
+      let targetLineHeight;
+
+      if (charLen <= 45) {
+        // Very short aphorism -> Hero quote, fills block in 2 bold lines
+        initialFontSizeRem = 1.18;
+        targetLineHeight = 1.34;
+      } else if (charLen <= 80) {
+        // Short quote -> 2-3 prominent lines
+        initialFontSizeRem = 1.04;
+        targetLineHeight = 1.30;
+      } else if (charLen <= 135) {
+        // Medium quote -> 3-4 balanced lines
+        initialFontSizeRem = 0.90;
+        targetLineHeight = 1.28;
+      } else if (charLen <= 210) {
+        // Medium-long quote -> Fills available block height
+        initialFontSizeRem = 0.80;
+        targetLineHeight = 1.26;
+      } else if (charLen <= 280) {
+        // Long quote (e.g. Abdul Kalam passage in screenshot) -> Fills full block
+        initialFontSizeRem = 0.74;
+        targetLineHeight = 1.24;
+      } else {
+        // Very long quote -> Base floor
+        initialFontSizeRem = 0.70;
+        targetLineHeight = 1.22;
+      }
+
+      quoteEl.style.fontSize = `${initialFontSizeRem}rem`;
+      quoteEl.style.lineHeight = String(targetLineHeight);
+
+      // 3. Dynamic layout pass knowing the known dimensions of Block 05
+      requestAnimationFrame(() => {
+        const availH = viewportEl.clientHeight;
+        const scrollH = quoteEl.scrollHeight;
+
+        if (availH > 30) {
+          const currentPx = parseFloat(window.getComputedStyle(quoteEl).fontSize);
+
+          // If text overflows by a moderate margin and can fit with slight scale down:
+          if (scrollH > availH + 2 && currentPx > 11.2) {
+            const fitScale = availH / scrollH;
+            const fittedPx = Math.max(11.0, currentPx * fitScale * 0.98);
+            quoteEl.style.fontSize = `${fittedPx}px`;
+          }
+          // If text is small and underfills the known space (< 70% of available height):
+          else if (scrollH < availH * 0.72 && charLen > 30 && currentPx < 22) {
+            const expandScale = Math.min(1.25, (availH * 0.88) / scrollH);
+            quoteEl.style.fontSize = `${Math.min(22, currentPx * expandScale)}px`;
+          }
+        }
+
+        // Apply smart vertical scroll if text breaches the block boundary
+        applyQuoteOverflowScroll(quoteEl, viewportEl);
+      });
     }
 
     async function loadDailyQuote(forceRefresh = false) {
@@ -1003,10 +1110,75 @@
     updateClock();
 
     function updateDOM() {
-      // Block 1: Location & Coordinates
-      document.getElementById('street-name').textContent = state.location.road;
-      const subParts = [state.location.cityState, state.location.county, state.location.zip].filter(Boolean);
-      document.getElementById('city-state-county').textContent = subParts.join(' • ') || 'Triangulating position...';
+      // Block 1: Location & Coordinates (Top Justified with Dynamic Sizing)
+      const streetEl = document.getElementById('street-name');
+      const cityStateEl = document.getElementById('city-state');
+      const countyZipEl = document.getElementById('county-zip');
+      const roadName = state.location.road || 'Resolving Location...';
+      streetEl.textContent = roadName;
+
+      // Dynamic sizing for street name based on length & container width
+      const roadLen = roadName.length;
+      if (roadLen <= 15) {
+        streetEl.style.fontSize = 'clamp(1.28rem, 3.25vh, 1.65rem)';
+      } else if (roadLen <= 24) {
+        streetEl.style.fontSize = 'clamp(1.15rem, 2.8vh, 1.42rem)';
+      } else if (roadLen <= 34) {
+        streetEl.style.fontSize = 'clamp(1.00rem, 2.3vh, 1.20rem)';
+      } else {
+        streetEl.style.fontSize = 'clamp(0.88rem, 2.05vh, 1.05rem)';
+      }
+
+      // Check width overflow for street name
+      requestAnimationFrame(() => {
+        if (streetEl.scrollWidth > streetEl.clientWidth && streetEl.clientWidth > 0) {
+          const currentPx = parseFloat(window.getComputedStyle(streetEl).fontSize);
+          const fitRatio = streetEl.clientWidth / streetEl.scrollWidth;
+          streetEl.style.fontSize = `${Math.max(14, currentPx * fitRatio * 0.96)}px`;
+        }
+      });
+
+      // Line 2: City & State (Calibrated secondary scale to preserve visual hierarchy & overflow safety)
+      const cityStateText = state.location.cityState || 'Triangulating GNSS & Wi-Fi';
+      cityStateEl.textContent = cityStateText;
+      const cityStateLen = cityStateText.length;
+      if (cityStateLen <= 16) {
+        cityStateEl.style.fontSize = 'clamp(0.88rem, 2.2vh, 1.02rem)';
+      } else if (cityStateLen <= 26) {
+        cityStateEl.style.fontSize = 'clamp(0.80rem, 2.0vh, 0.94rem)';
+      } else {
+        cityStateEl.style.fontSize = 'clamp(0.74rem, 1.85vh, 0.86rem)';
+      }
+
+      requestAnimationFrame(() => {
+        if (cityStateEl.scrollWidth > cityStateEl.clientWidth && cityStateEl.clientWidth > 0) {
+          const currentPx = parseFloat(window.getComputedStyle(cityStateEl).fontSize);
+          const fitRatio = cityStateEl.clientWidth / cityStateEl.scrollWidth;
+          cityStateEl.style.fontSize = `${Math.max(12, currentPx * fitRatio * 0.96)}px`;
+        }
+      });
+
+      // Line 3: County & Zip on their own line (Tertiary metadata scale)
+      const countyZipParts = [state.location.county, state.location.zip].filter(Boolean);
+      const countyZipText = countyZipParts.join(' • ') || (state.location.cityState ? '' : 'Scanning Position');
+      countyZipEl.textContent = countyZipText;
+      countyZipEl.style.display = countyZipText ? 'block' : 'none';
+      const czLen = countyZipText.length;
+      if (czLen <= 24) {
+        countyZipEl.style.fontSize = 'clamp(0.76rem, 1.85vh, 0.88rem)';
+      } else if (czLen <= 36) {
+        countyZipEl.style.fontSize = 'clamp(0.72rem, 1.75vh, 0.82rem)';
+      } else {
+        countyZipEl.style.fontSize = 'clamp(0.68rem, 1.65vh, 0.78rem)';
+      }
+
+      requestAnimationFrame(() => {
+        if (countyZipEl.scrollWidth > countyZipEl.clientWidth && countyZipEl.clientWidth > 0) {
+          const currentPx = parseFloat(window.getComputedStyle(countyZipEl).fontSize);
+          const fitRatio = countyZipEl.clientWidth / countyZipEl.scrollWidth;
+          countyZipEl.style.fontSize = `${Math.max(11, currentPx * fitRatio * 0.96)}px`;
+        }
+      });
       
       if (state.latitude !== 0 || state.longitude !== 0) {
         const latStr = `${Math.abs(state.latitude).toFixed(6)}° ${state.latitude >= 0 ? 'N' : 'S'}`;
@@ -1227,7 +1399,7 @@
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 4000);
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&zoom=18&addressdetails=1`, {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&zoom=18&addressdetails=1&extra_tags=1`, {
           signal: controller.signal,
           headers: { 'Accept-Language': 'en' }
         });
@@ -1236,8 +1408,27 @@
         if (res.ok) {
           const data = await res.json();
           const addr = data.address || {};
+          let houseNumber = (addr.house_number || addr.street_number || addr.housenumber || addr.building_number || addr.conscriptionnumber || '').trim();
           
-          let road = addr.road || addr.highway || addr.motorway || addr.trunk || addr.primary || addr.secondary || addr.street || addr.pedestrian || (data.name && data.name !== addr.city ? data.name : null) || 'Corridor En Route';
+          // Check extratags if provided
+          if (!houseNumber && data.extratags && data.extratags['addr:housenumber']) {
+            houseNumber = data.extratags['addr:housenumber'].trim();
+          }
+
+          // Check display_name leading house number e.g. "10, Glen Circle, ..."
+          if (!houseNumber && data.display_name) {
+            const dnMatch = data.display_name.match(/^(\d+[\w-]*)\s*,\s*/);
+            if (dnMatch && dnMatch[1]) {
+              houseNumber = dnMatch[1].trim();
+            }
+          }
+
+          // Check data.name if numeric
+          if (!houseNumber && data.name && /^\d+[\w-]*$/.test(data.name.trim())) {
+            houseNumber = data.name.trim();
+          }
+
+          let road = addr.road || addr.highway || addr.motorway || addr.trunk || addr.primary || addr.secondary || addr.street || addr.pedestrian || (data.name && data.name !== addr.city && !/^\d+$/.test(data.name) ? data.name : null) || 'Corridor En Route';
           road = abbreviateStreetName(road);
 
           // Corridor directional alignment
@@ -1246,6 +1437,11 @@
             if (!road.toLowerCase().includes(corridor.toLowerCase())) {
               road = `${road} ${corridor}`;
             }
+          }
+
+          // Format house number with street name e.g. "10 Glen Cir."
+          if (houseNumber && !road.toLowerCase().startsWith(houseNumber.toLowerCase())) {
+            road = `${houseNumber} ${road}`;
           }
 
           let city = addr.city || addr.town || addr.village || addr.municipality || addr.suburb || addr.hamlet || '';
@@ -1568,7 +1764,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.09292026.2220';
+    const NOMAD_CURRENT_VERSION = 'v1.09302026.1230';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

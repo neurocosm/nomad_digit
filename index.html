@@ -94,12 +94,63 @@
       font-family: 'JetBrains Mono', monospace;
       color: var(--text-muted);
       letter-spacing: 0.06em;
-      padding: 1px 7px;
-      border: 1px solid rgba(0, 243, 255, 0.18);
+      padding: 2px 8px;
+      border: 1px solid rgba(0, 243, 255, 0.2);
       border-radius: 10px;
-      background: rgba(15, 23, 42, 0.5);
+      background: rgba(15, 23, 42, 0.6);
       user-select: none;
       line-height: 1.4;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .version-tag:hover {
+      border-color: rgba(0, 243, 255, 0.4);
+      color: var(--text-main);
+    }
+
+    /* Orange Ring & Alert when Update Available */
+    .version-tag.has-update {
+      color: #ffb74d;
+      border: 1.5px solid #ff9800;
+      background: rgba(255, 152, 0, 0.14);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      animation: pulseOrangeRing 2s infinite ease-in-out;
+    }
+
+    .version-tag.has-update:hover {
+      background: rgba(255, 152, 0, 0.25);
+      border-color: #ffa726;
+      color: #ffffff;
+    }
+
+    .version-tag.has-update .update-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ff9800;
+      box-shadow: 0 0 6px #ff9800;
+      animation: blinkUpdateDot 1s infinite alternate;
+    }
+
+    @keyframes pulseOrangeRing {
+      0%, 100% {
+        box-shadow: 0 0 6px rgba(255, 152, 0, 0.4), inset 0 0 4px rgba(255, 152, 0, 0.15);
+        border-color: #ff9800;
+      }
+      50% {
+        box-shadow: 0 0 14px rgba(255, 152, 0, 0.8), inset 0 0 8px rgba(255, 152, 0, 0.35);
+        border-color: #ffb74d;
+      }
+    }
+
+    @keyframes blinkUpdateDot {
+      from { opacity: 0.3; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1.15); }
     }
 
     .top-controls {
@@ -379,7 +430,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version">v1.09292026.2214</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09292026.2220</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Avionics Sound">AUDIO: ON</button>
     </div>
@@ -1513,6 +1564,146 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') requestWakeLock();
     });
+
+    // ==========================================
+    // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
+    // ==========================================
+    const NOMAD_CURRENT_VERSION = 'v1.09292026.2220';
+    let serviceWorkerRegistration = null;
+    let isUpdateAvailable = false;
+
+    const versionTagEl = document.getElementById('hud-version');
+
+    function setUpdateAvailableState(remoteVersion) {
+      if (isUpdateAvailable) return;
+      isUpdateAvailable = true;
+      if (versionTagEl) {
+        versionTagEl.classList.add('has-update');
+        versionTagEl.innerHTML = '<span class="update-dot"></span> UPDATE AVAILABLE';
+        versionTagEl.setAttribute('title', `New version ${remoteVersion || ''} available. Tap to refresh system.`);
+      }
+    }
+
+    async function checkRemoteVersion(showFeedbackOnUpToDate = false) {
+      if (isUpdateAvailable) return;
+
+      try {
+        let res = await fetch(`/version.json?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+        }).catch(() => null);
+
+        if (!res || !res.ok) {
+          res = await fetch(`/public/version.json?t=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+          }).catch(() => null);
+        }
+
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.version && data.version !== NOMAD_CURRENT_VERSION) {
+            setUpdateAvailableState(data.version);
+            return;
+          }
+        }
+      } catch (err) {}
+
+      if (serviceWorkerRegistration) {
+        try {
+          await serviceWorkerRegistration.update();
+        } catch (e) {}
+      }
+
+      if (showFeedbackOnUpToDate && !isUpdateAvailable) {
+        showToast(`SYSTEM UP TO DATE (${NOMAD_CURRENT_VERSION})`);
+      }
+    }
+
+    function applySystemUpdate() {
+      playTone(1600);
+      showToast('APPLYING UPDATE...');
+
+      if (serviceWorkerRegistration && serviceWorkerRegistration.waiting) {
+        serviceWorkerRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          Promise.all(names.map((name) => caches.delete(name))).finally(() => {
+            setTimeout(() => {
+              window.location.reload();
+            }, 350);
+          });
+        });
+      } else {
+        setTimeout(() => {
+          window.location.reload();
+        }, 350);
+      }
+    }
+
+    if (versionTagEl) {
+      versionTagEl.addEventListener('click', () => {
+        if (isUpdateAvailable) {
+          applySystemUpdate();
+        } else {
+          playTone(1200);
+          showToast('CHECKING FOR UPDATES...');
+          checkRemoteVersion(true);
+        }
+      });
+    }
+
+    // PWA Service Worker Registration & Lifecycle
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => {
+            serviceWorkerRegistration = reg;
+
+            if (reg.waiting) {
+              setUpdateAvailableState();
+            }
+
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    setUpdateAvailableState();
+                  }
+                });
+              }
+            });
+          })
+          .catch(() => {});
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      });
+    }
+
+    // Call Home Triggers:
+    // 1. Initial check after boot
+    setTimeout(() => checkRemoteVersion(false), 2000);
+    // 2. Periodic poll every 60 seconds
+    setInterval(() => checkRemoteVersion(false), 60000);
+    // 3. On window focus / return to app
+    window.addEventListener('focus', () => checkRemoteVersion(false));
+    // 4. On network reconnection
+    window.addEventListener('online', () => checkRemoteVersion(false));
+
+    // Developer simulation helper
+    window.simulateUpdate = () => {
+      setUpdateAvailableState('v1.TEST.UPDATE');
+      showToast('UPDATE DETECTED (SIMULATED)');
+    };
 
     // Boot
     startTracking();

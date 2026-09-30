@@ -18,9 +18,9 @@ function getEasternBuildString() {
     const yyyy = getPart('year');
     const hh = getPart('hour');
     const min = getPart('minute');
-    return `v4.${mm}${dd}${yyyy}.${hh}${min}`;
+    return `v1.${mm}${dd}${yyyy}.${hh}${min}`;
   } catch (e) {
-    return 'v4.09292026.1754';
+    return 'v1.09292026.2220';
   }
 }
 

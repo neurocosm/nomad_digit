@@ -1,5 +1,5 @@
 // NOMAD: DIGIT - Service Worker
-const CACHE_NAME = 'nomad-digit-v1.09302026.2017';
+const CACHE_NAME = 'nomad-digit-v1.09302026.2027';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

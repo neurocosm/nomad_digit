@@ -370,30 +370,30 @@
       transition: font-size 0.15s ease;
     }
 
-    /* City & State (Secondary hierarchy: distinct, clearly subordinate to street name) */
+    /* City & State (Secondary hierarchy: distinct, +10% enlarged, clearly subordinate to street name) */
     .loc-city-state {
-      font-size: clamp(0.86rem, 2.15vh, 1.00rem);
+      font-size: clamp(0.95rem, 2.36vh, 1.10rem);
       color: #e2e8f0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.2;
-      font-weight: 600;
+      font-weight: 650;
       letter-spacing: -0.005em;
       margin: 0;
       padding: 0;
       transition: font-size 0.15s ease;
     }
 
-    /* County & Zip (Tertiary metadata: subtle slate styling) */
+    /* County & Zip (Tertiary metadata: +10% enlarged, subtle slate styling) */
     .loc-county-zip {
-      font-size: clamp(0.74rem, 1.85vh, 0.86rem);
+      font-size: clamp(0.81rem, 2.04vh, 0.95rem);
       color: #94a3b8;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.2;
-      font-weight: 500;
+      font-weight: 550;
       letter-spacing: 0.01em;
       margin: 0;
       padding: 0;
@@ -506,7 +506,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.2017</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.2027</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -622,9 +622,9 @@
         <span>04 // CHRONOMETRY &amp; TIMEGRID</span>
         <span id="timezone-badge" class="block-badge locked">LOCAL TIME</span>
       </div>
-      <div class="metric-split-row">
+      <div class="metric-split-row" style="grid-template-columns: 1.35fr 1.15fr;">
         <!-- Time AM/PM -->
-        <div class="metric-col" style="grid-column: span 2;">
+        <div class="metric-col">
           <span class="col-title">TIME</span>
           <div class="col-hero font-mono" style="font-size: clamp(1.4rem, 3.8vh, 1.95rem); letter-spacing: -0.02em;">
             <span id="clock-time">12:00:00</span>
@@ -635,10 +635,10 @@
         <!-- Day & Date (MM DD YYYY) -->
         <div class="metric-col" style="text-align: right; align-items: flex-end;">
           <span class="col-title">DAY &amp; DATE</span>
-          <div id="clock-day" style="font-size: clamp(0.92rem, 2.4vh, 1.15rem); font-weight: 800; color: var(--accent-cyan); text-transform: uppercase;">
+          <div id="clock-day" style="font-size: clamp(0.97rem, 2.52vh, 1.21rem); font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; white-space: nowrap; line-height: 1.15;">
             TUESDAY
           </div>
-          <span id="clock-date" class="font-mono" style="font-size: clamp(0.68rem, 1.7vh, 0.78rem); color: var(--text-main); font-weight: 600; margin-top: 1px;">
+          <span id="clock-date" class="font-mono" style="font-size: clamp(0.97rem, 2.52vh, 1.21rem); color: var(--text-main); font-weight: 700; white-space: nowrap; line-height: 1.15; margin-top: 2px;">
             09 29 2026
           </span>
         </div>
@@ -1156,16 +1156,16 @@
         }
       });
 
-      // Line 2: City & State (Calibrated secondary scale to preserve visual hierarchy & overflow safety)
+      // Line 2: City & State (+10% enlarged, clear secondary scale with overflow safety)
       const cityStateText = state.location.cityState || 'Triangulating GNSS & Wi-Fi';
       cityStateEl.textContent = cityStateText;
       const cityStateLen = cityStateText.length;
       if (cityStateLen <= 16) {
-        cityStateEl.style.fontSize = 'clamp(0.88rem, 2.2vh, 1.02rem)';
+        cityStateEl.style.fontSize = 'clamp(0.97rem, 2.42vh, 1.12rem)';
       } else if (cityStateLen <= 26) {
-        cityStateEl.style.fontSize = 'clamp(0.80rem, 2.0vh, 0.94rem)';
+        cityStateEl.style.fontSize = 'clamp(0.88rem, 2.20vh, 1.04rem)';
       } else {
-        cityStateEl.style.fontSize = 'clamp(0.74rem, 1.85vh, 0.86rem)';
+        cityStateEl.style.fontSize = 'clamp(0.82rem, 2.04vh, 0.95rem)';
       }
 
       requestAnimationFrame(() => {
@@ -1176,18 +1176,18 @@
         }
       });
 
-      // Line 3: County & Zip on their own line (Tertiary metadata scale)
+      // Line 3: County & Zip on their own line (+10% enlarged, clean slate metadata scale)
       const countyZipParts = [state.location.county, state.location.zip].filter(Boolean);
       const countyZipText = countyZipParts.join(' • ') || (state.location.cityState ? '' : 'Scanning Position');
       countyZipEl.textContent = countyZipText;
       countyZipEl.style.display = countyZipText ? 'block' : 'none';
       const czLen = countyZipText.length;
       if (czLen <= 24) {
-        countyZipEl.style.fontSize = 'clamp(0.76rem, 1.85vh, 0.88rem)';
+        countyZipEl.style.fontSize = 'clamp(0.84rem, 2.04vh, 0.97rem)';
       } else if (czLen <= 36) {
-        countyZipEl.style.fontSize = 'clamp(0.72rem, 1.75vh, 0.82rem)';
+        countyZipEl.style.fontSize = 'clamp(0.79rem, 1.93vh, 0.90rem)';
       } else {
-        countyZipEl.style.fontSize = 'clamp(0.68rem, 1.65vh, 0.78rem)';
+        countyZipEl.style.fontSize = 'clamp(0.75rem, 1.82vh, 0.86rem)';
       }
 
       requestAnimationFrame(() => {
@@ -1865,7 +1865,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.09302026.2017';
+    const NOMAD_CURRENT_VERSION = 'v1.09302026.2027';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

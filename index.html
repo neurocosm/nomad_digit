@@ -310,14 +310,15 @@
     }
 
     .col-hero {
-      font-size: clamp(1.15rem, 3.2vh, 1.55rem);
+      font-size: clamp(1.27rem, 3.52vh, 1.71rem);
       font-weight: 800;
       line-height: 1.05;
       color: var(--text-main);
+      white-space: nowrap;
     }
 
     .col-hero .sub-unit {
-      font-size: 0.72rem;
+      font-size: 0.79rem;
       color: var(--accent-cyan);
       font-weight: 700;
       margin-left: 2px;
@@ -506,7 +507,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.2027</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.2043</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -1865,7 +1866,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.09302026.2027';
+    const NOMAD_CURRENT_VERSION = 'v1.09302026.2043';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

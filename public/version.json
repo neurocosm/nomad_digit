@@ -1,6 +1,6 @@
 {
-  "version": "v1.09302026.2027",
+  "version": "v1.09302026.2043",
   "buildDate": "09302026",
-  "buildTimeEastern": "2027",
-  "releaseNotes": "Increased Block 04 Day and Date typography by +5%."
+  "buildTimeEastern": "2043",
+  "releaseNotes": "Increased Block 02 (Speed, Bearing, Elevation) and Block 03 (Temp, Atmosphere, Barometer) data by +10%."
 }

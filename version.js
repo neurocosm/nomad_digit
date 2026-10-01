@@ -20,7 +20,7 @@ function getEasternBuildString() {
     const min = getPart('minute');
     return `v1.${mm}${dd}${yyyy}.${hh}${min}`;
   } catch (e) {
-    return 'v1.09302026.2027';
+    return 'v1.09302026.2043';
   }
 }
 

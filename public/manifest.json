@@ -1,7 +1,10 @@
 {
-  "name": "NOMAD: Hyperspace",
-  "short_name": "NOMAD",
-  "start_url": "/",
+  "id": "/nomad-digit",
+  "name": "Nomad DIGIT",
+  "short_name": "Nomad DIGIT",
+  "description": "Nomad DIGIT - Kinetic Telemetry & Avionics Cockpit",
+  "start_url": "/?pwa=digit",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#050811",
@@ -10,7 +13,8 @@
     {
       "src": "/icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

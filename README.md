@@ -2,18 +2,18 @@
 nomad_digit - text only telemetry HUD for mobilization. 
 
 
-NOMAD: Hyperspace (Version 4) & NOMAD: RoadTrip
+Nomad DIGIT (Version 1) & NOMAD Legacy
 > **Kinetic Telemetry, Navigation Avionics & Geospatial Data Architecture**  
 > **Visionary & Creator:** BostonyFX ([@neurocosm](https://www.instagram.com/neurocosm))
 ---
 1. System Implementation & Architecture Overview
-NOMAD operates as an ultra-responsive, browser-native avionics cockpit and telemetry instrument cluster. Originally conceived in NOMAD: RoadTrip (Version 3) as a high-visibility, modular road trip navigation HUD and evolved into NOMAD: Hyperspace (Version 4), the architecture transforms raw smart device hardware sensors and low-latency geospatial web APIs into clean, structured, and visually decoupled telemetry streams.
+NOMAD operates as an ultra-responsive, browser-native avionics cockpit and telemetry instrument cluster. Originally conceived in NOMAD: RoadTrip as a high-visibility, modular road trip navigation HUD and evolved into Nomad DIGIT, the architecture transforms raw smart device hardware sensors and low-latency geospatial web APIs into clean, structured, and visually decoupled telemetry streams.
 Designed specifically for real-world vehicular environments, the core engine solves the instability inherent in consumer mobile hardware. Raw GPS jitter, multipath noise, and phone cabin vibration are conditioned through hardware-grade filtering: a stationary speed deadband clamps artificial drift to true zero MPH at stoplights, corridor axis constraints lock compass readings to physical highway travel grids, and asynchronous rate-limited polling preserves battery and thermal headroom. The presentation tier decouples data values from visual framing, allowing telemetry to float on autonomous Newtonian kinetic vectors, lock into stationary cockpit pins, or feed directly into text-based analytics, diagnostic clusters, and standard GPX flight logs.
 ---
 2. Telemetry Data Objects & Dynamic Presentation
 Every telemetry metric in NOMAD is encapsulated in a dedicated data object that bridges internal sensor measurements with flexible, viewport-responsive presentation blocks.
-A. Kinetic & Pinned Telemetry Bubbles (Hyperspace Engine)
-NOMAD Hyperspace packages discrete telemetry data points into individual floating or pinned containers with curated geometric defaults, live fluid font scaling, and pure alpha contour isolation:
+A. Kinetic & Pinned Telemetry Elements (Nomad DIGIT Engine)
+Nomad DIGIT packages discrete telemetry data points into individual floating or pinned containers with curated geometric defaults, live fluid font scaling, and pure alpha contour isolation:
 Speed Telemetry Object (`#speed-bubble`)
 Data Payload: Instantaneous ground speed, unit of measure (`MPH` or `KM/H`), speed status indicator.
 Curated Default Geometry: Egg / Oval (`border-radius: 50% / 60% 60% 40% 40%`).
@@ -129,16 +129,16 @@ One-touch export triggering standard `.gpx` file download compatible with Strava
 ---
 8. Central Version & Creator Registry (`version.js`)
 All branding, version numbers, and creator links are maintained centrally in `/version.js` as the single source of truth across the entire application:
-Active Brand Identity: `NOMAD: Hyperspace` (Version 4) & `NOMAD: RoadTrip` (Version 3 Legacy).
+Active Brand Identity: `Nomad DIGIT`.
 Creator / Visionary Credits: BostonyFX (@neurocosm).
 Version Registry Timezone Rule (US Eastern Time / ET):
-Build timestamps strictly follow 24-hour US Eastern Time (ET: EDT/EST, UTC-4/UTC-5): `v4.[MMDDYYYY].[HHMM]`.
+Build timestamps strictly follow 24-hour US Eastern Time (ET: EDT/EST, UTC-4/UTC-5): `v1.[MMDDYYYY].[HHMM]`.
 Automated Merge Tag Engine:
 Any view or document including `<script src="version.js"></script>` automatically hydrates standard merge tags on load:
-`[merge_visionary]` → `NOMAD: Hyperspace by BostonyFX` (with live Instagram link)
+`[merge_visionary]` → `Nomad DIGIT by BostonyFX` (with live Instagram link)
 `[merge_creator]` or `[merge_author]` → `BostonyFX` (with live Instagram link)
-`[merge_footer]` → `NOMAD: Hyperspace Navigation Dashboard • Crafted by BostonyFX`
-`[merge_version]` → Active build version string (e.g. `v4.09202026.0713`)
+`[merge_footer]` → `Nomad DIGIT Navigation Dashboard • Crafted by BostonyFX`
+`[merge_version]` → Active build version string (e.g. `v1.09302026.2017`)
 Semantic Target Classes:
 `<span class="nomad-brand"></span>`
 `<span class="nomad-creator"></span>`

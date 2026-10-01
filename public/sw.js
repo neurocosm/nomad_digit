@@ -1,11 +1,10 @@
 // NOMAD: DIGIT - Service Worker
-const CACHE_NAME = 'nomad-digit-v1.09302026.1230';
+const CACHE_NAME = 'nomad-digit-v1.09302026.2017';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/public/manifest.json',
-  '/public/icon.svg',
-  '/public/version.json'
+  '/manifest.json',
+  '/icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -14,7 +13,8 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE).catch(() => {});
     })
   );
-  // Do not automatically skipWaiting; wait until user triggers update
+  // Allow immediate activation when updated
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -35,13 +35,26 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  if (event.data && event.data.type === 'FORCE_PURGE') {
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((k) => caches.delete(k)));
+    }).then(() => {
+      return self.registration.unregister();
+    });
+  }
 });
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Always bypass cache for version.json and live API telemetry calls
-  if (url.pathname.includes('version.json') || url.pathname.includes('/api/') || url.origin !== location.origin) {
+  // Always bypass SW cache for version checks, flush queries, and external APIs
+  if (
+    url.pathname.includes('version.json') || 
+    url.searchParams.has('flush') || 
+    url.searchParams.has('t') || 
+    url.pathname.includes('/api/') || 
+    url.origin !== location.origin
+  ) {
     return;
   }
 

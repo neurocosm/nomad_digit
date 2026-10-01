@@ -1,6 +1,6 @@
 {
-  "version": "v1.09302026.1230",
+  "version": "v1.09302026.2017",
   "buildDate": "09302026",
-  "buildTimeEastern": "1230",
-  "releaseNotes": "Rebalanced Block 01 visual hierarchy: calibrated City & State to secondary scale with strict overflow prevention."
+  "buildTimeEastern": "2017",
+  "releaseNotes": "Branded PWA identity as Nomad DIGIT, removed Hyperspace references, and added Long-Press Deep Cache Flush on Audio button."
 }

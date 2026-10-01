@@ -20,14 +20,13 @@ function getEasternBuildString() {
     const min = getPart('minute');
     return `v1.${mm}${dd}${yyyy}.${hh}${min}`;
   } catch (e) {
-    return 'v1.09302026.1230';
+    return 'v1.09302026.2017';
   }
 }
 
 const NOMAD_VERSION_INFO = {
-  appName: 'NOMAD: DIGIT',
-  appNameLegacy: 'NOMAD: Hyperspace',
-  versionNumber: '4.0.0',
+  appName: 'Nomad DIGIT',
+  versionNumber: '1.0.0',
   buildVersion: getEasternBuildString(),
   creator: 'BostonyFX',
   instagramHandle: '@neurocosm',

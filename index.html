@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>NOMAD: DIGIT - Telemetry HUD</title>
-  <meta name="description" content="nomad_digit - text only telemetry HUD for mobilization by BostonyFX (@neurocosm)" />
+  <title>Nomad DIGIT</title>
+  <meta name="description" content="Nomad DIGIT - Kinetic Telemetry, Navigation Avionics & Text HUD for Mobilization by BostonyFX (@neurocosm)" />
+  <meta name="application-name" content="Nomad DIGIT" />
+  <meta name="apple-mobile-web-app-title" content="Nomad DIGIT" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#050811" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -181,6 +185,20 @@
       background: rgba(0, 243, 255, 0.16);
       color: var(--accent-cyan);
       border-color: var(--accent-cyan);
+    }
+
+    .btn-ctrl.pressing {
+      transform: scale(0.91);
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.28) !important;
+      color: #fca5a5 !important;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.7);
+      animation: pulse-purge 0.35s infinite alternate;
+    }
+
+    @keyframes pulse-purge {
+      from { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); transform: scale(0.92); }
+      to { box-shadow: 0 0 18px rgba(239, 68, 68, 0.95); transform: scale(0.88); }
     }
 
     /* Vertical 5-Block Stack for Pixel 11 PRO / Mobile Viewport (100dvh non-scrollable) */
@@ -488,9 +506,9 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.1230</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.2017</div>
     <div class="top-controls">
-      <button id="btn-audio" class="btn-ctrl active" title="Avionics Sound">AUDIO: ON</button>
+      <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
   </div>
 
@@ -1739,13 +1757,96 @@
       loadDailyQuote(true);
     });
 
-    document.getElementById('btn-audio').addEventListener('click', () => {
+    // ==========================================
+    // AUDIO ON/OFF & LONG-PRESS DEEP CACHE FLUSH
+    // ==========================================
+    const audioBtn = document.getElementById('btn-audio');
+    let audioPressTimer = null;
+    let isLongPressTriggered = false;
+
+    async function triggerDeepAppFlush() {
+      isLongPressTriggered = true;
+      if (audioBtn) audioBtn.classList.remove('pressing');
+
+      // Haptic feedback & avionics purge chime
+      try {
+        if ('vibrate' in navigator) navigator.vibrate([100, 50, 150]);
+      } catch (e) {}
+
+      playTone(1800);
+      setTimeout(() => playTone(2400), 120);
+      showToast('SYSTEM PURGE: FLUSHING CACHE & REFETCHING SOURCE...');
+
+      // 1. Post FORCE_PURGE to Service Worker & unregister all workers
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const reg of registrations) {
+            if (reg.active) {
+              reg.active.postMessage({ type: 'FORCE_PURGE' });
+            }
+            await reg.unregister();
+          }
+        } catch (e) {}
+      }
+
+      // 2. Wipe every CacheStorage instance
+      if ('caches' in window) {
+        try {
+          const cacheKeys = await caches.keys();
+          await Promise.all(cacheKeys.map(k => caches.delete(k)));
+        } catch (e) {}
+      }
+
+      // 3. Clear session and temporary storage
+      try {
+        sessionStorage.clear();
+        localStorage.removeItem('nomad_cached_version');
+        localStorage.removeItem('nomad_last_update_check');
+      } catch (e) {}
+
+      // 4. Force hard reload from server with timestamp cache-buster
+      setTimeout(() => {
+        const dest = new URL(window.location.origin + window.location.pathname);
+        dest.searchParams.set('flush', Date.now().toString());
+        window.location.replace(dest.toString());
+      }, 500);
+    }
+
+    function startAudioPress() {
+      isLongPressTriggered = false;
+      audioBtn.classList.add('pressing');
+      clearTimeout(audioPressTimer);
+      audioPressTimer = setTimeout(() => {
+        triggerDeepAppFlush();
+      }, 800); // 800ms threshold for deep purge
+    }
+
+    function cancelAudioPress() {
+      clearTimeout(audioPressTimer);
+      audioBtn.classList.remove('pressing');
+    }
+
+    function handleAudioClick(e) {
+      if (isLongPressTriggered) {
+        e.preventDefault();
+        e.stopPropagation();
+        isLongPressTriggered = false;
+        return;
+      }
       state.soundEnabled = !state.soundEnabled;
-      const btn = document.getElementById('btn-audio');
-      btn.textContent = state.soundEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
-      btn.className = 'btn-ctrl ' + (state.soundEnabled ? 'active' : '');
+      audioBtn.textContent = state.soundEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
+      audioBtn.className = 'btn-ctrl ' + (state.soundEnabled ? 'active' : '');
       if (state.soundEnabled) playTone(1200);
-    });
+    }
+
+    if (audioBtn) {
+      audioBtn.addEventListener('pointerdown', startAudioPress);
+      audioBtn.addEventListener('pointerup', cancelAudioPress);
+      audioBtn.addEventListener('pointercancel', cancelAudioPress);
+      audioBtn.addEventListener('pointerleave', cancelAudioPress);
+      audioBtn.addEventListener('click', handleAudioClick);
+    }
 
     // Screen Wake Lock
     let wakeLock = null;
@@ -1764,7 +1865,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.09302026.1230';
+    const NOMAD_CURRENT_VERSION = 'v1.09302026.2017';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

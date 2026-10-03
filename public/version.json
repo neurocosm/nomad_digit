@@ -1,6 +1,6 @@
 {
-  "version": "v1.09302026.2051",
-  "buildDate": "09302026",
-  "buildTimeEastern": "2051",
-  "releaseNotes": "Implemented dynamic geometry-fit text sizing engine in Block 05 with balanced multi-line wrapping and instant TAP: REFRESH integration."
+  "version": "v1.10022026.2021",
+  "buildDate": "10022026",
+  "buildTimeEastern": "2021",
+  "releaseNotes": "Tightened corner radius to 12px with 12px inner padding, removed all translucent pill fill washes to eliminate perceived glow halos, and streamlined Block 01 telemetry badge to single line NET-GEO."
 }

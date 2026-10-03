@@ -28,7 +28,7 @@
       --accent-cyan: #00f3ff;
       --accent-green: #10b981;
       --accent-amber: #f59e0b;
-      --radius-block: 22px;
+      --radius-block: 12px;
     }
 
     * {
@@ -55,7 +55,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: env(safe-area-inset-top, 6px) 12px env(safe-area-inset-bottom, 6px);
+      padding: env(safe-area-inset-top, 6px) 6px env(safe-area-inset-bottom, 6px);
     }
 
     .font-mono {
@@ -66,7 +66,7 @@
     /* Top Utility Header */
     .top-header {
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       height: 28px;
       flex-shrink: 0;
       display: flex;
@@ -90,7 +90,6 @@
       height: 6px;
       background: var(--accent-cyan);
       border-radius: 50%;
-      box-shadow: 0 0 6px var(--accent-cyan);
     }
 
     .version-tag {
@@ -137,18 +136,17 @@
       height: 6px;
       border-radius: 50%;
       background: #ff9800;
-      box-shadow: 0 0 6px #ff9800;
       animation: blinkUpdateDot 1s infinite alternate;
     }
 
     @keyframes pulseOrangeRing {
       0%, 100% {
-        box-shadow: 0 0 6px rgba(255, 152, 0, 0.4), inset 0 0 4px rgba(255, 152, 0, 0.15);
         border-color: #ff9800;
+        background: rgba(255, 152, 0, 0.14);
       }
       50% {
-        box-shadow: 0 0 14px rgba(255, 152, 0, 0.8), inset 0 0 8px rgba(255, 152, 0, 0.35);
         border-color: #ffb74d;
+        background: rgba(255, 152, 0, 0.28);
       }
     }
 
@@ -192,25 +190,24 @@
       border-color: #ef4444 !important;
       background: rgba(239, 68, 68, 0.28) !important;
       color: #fca5a5 !important;
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.7);
       animation: pulse-purge 0.35s infinite alternate;
     }
 
     @keyframes pulse-purge {
-      from { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); transform: scale(0.92); }
-      to { box-shadow: 0 0 18px rgba(239, 68, 68, 0.95); transform: scale(0.88); }
+      from { transform: scale(0.92); opacity: 0.9; }
+      to { transform: scale(0.88); opacity: 1; }
     }
 
     /* Vertical 5-Block Stack for Pixel 11 PRO / Mobile Viewport (100dvh non-scrollable) */
     .blocks-stack {
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 7px;
-      margin: 4px 0;
+      gap: 4px;
+      margin: 2px 0;
       min-height: 0;
     }
 
@@ -221,13 +218,12 @@
       background: var(--bg-card);
       border: 1.5px solid var(--border-cyan);
       border-radius: var(--radius-block);
-      padding: 8px 16px;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
       transition: border-color 0.15s, background-color 0.15s, transform 0.1s;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
       overflow: hidden;
     }
 
@@ -254,24 +250,26 @@
 
     .block-badge {
       padding: 1px 7px;
-      border-radius: 10px;
+      border-radius: 6px;
       font-size: 0.6rem;
       font-weight: 700;
-      background: rgba(0, 243, 255, 0.12);
-      border: 1px solid rgba(0, 243, 255, 0.35);
+      background: transparent;
+      border: 1px solid rgba(0, 243, 255, 0.45);
       color: var(--accent-cyan);
       line-height: 1.3;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .block-badge.stopped {
-      background: rgba(148, 163, 184, 0.1);
-      border-color: rgba(148, 163, 184, 0.3);
+      background: transparent;
+      border-color: rgba(148, 163, 184, 0.35);
       color: var(--text-muted);
     }
 
     .block-badge.locked {
-      background: rgba(16, 185, 129, 0.12);
-      border-color: rgba(16, 185, 129, 0.4);
+      background: transparent;
+      border-color: rgba(16, 185, 129, 0.55);
       color: var(--accent-green);
     }
 
@@ -466,7 +464,6 @@
       font-family: 'JetBrains Mono', monospace;
       display: none;
       z-index: 100;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
     }
 
     .footer-bar {
@@ -508,7 +505,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.09302026.2051</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2021</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -520,8 +517,8 @@
     <!-- BLOCK 1: Location & Coordinates -->
     <div id="block-location" class="rounded-block" title="Tap to copy coordinates">
       <div class="block-meta-top">
-        <span>01 // LOCATION &amp; COORDINATES</span>
-        <span id="corridor-axis-badge" class="block-badge stopped">SEEKING SIGNAL...</span>
+        <span>01 // LOCATION &amp; COORDS</span>
+        <span id="corridor-axis-badge" class="block-badge stopped">SEEKING...</span>
       </div>
       <div id="block-location-content" class="block-location-content">
         <div id="street-name" class="loc-street-name">
@@ -1219,20 +1216,20 @@
       const badgeLoc = document.getElementById('corridor-axis-badge');
       if (state.locationSource === 'GPS') {
         if (state.accuracyM <= 1.8) {
-          badgeLoc.textContent = `DUAL-FREQ L1+L5: ±${state.accuracyM.toFixed(1)}M`;
+          badgeLoc.textContent = `GNSS L1/L5 ±${state.accuracyM.toFixed(1)}M`;
         } else if (state.accuracyM <= 5.0) {
-          badgeLoc.textContent = `GNSS 4-CONSTEL: ±${state.accuracyM.toFixed(1)}M`;
+          badgeLoc.textContent = `GNSS ±${state.accuracyM.toFixed(1)}M`;
         } else if (state.accuracyM <= 15.0) {
-          badgeLoc.textContent = `A-GPS MULTI-SAT: ±${state.accuracyM.toFixed(1)}M`;
+          badgeLoc.textContent = `A-GPS ±${state.accuracyM.toFixed(1)}M`;
         } else {
-          badgeLoc.textContent = `WI-FI / CELL: ±${state.accuracyM.toFixed(1)}M`;
+          badgeLoc.textContent = `CELL/NET ±${state.accuracyM.toFixed(1)}M`;
         }
         badgeLoc.className = 'block-badge ' + (state.accuracyM <= 10 ? 'locked' : '');
       } else if (state.locationSource === 'WIFI_IP') {
-        badgeLoc.textContent = `WI-FI / NET GEO: ±${Math.round(state.accuracyM / 1000)}KM`;
+        badgeLoc.textContent = `NET-GEO ±${Math.round(state.accuracyM / 1000)}KM`;
         badgeLoc.className = 'block-badge stopped';
       } else {
-        badgeLoc.textContent = 'SEEKING SIGNAL...';
+        badgeLoc.textContent = 'SEEKING...';
         badgeLoc.className = 'block-badge stopped';
       }
 
@@ -1875,7 +1872,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.09302026.2051';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2021';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

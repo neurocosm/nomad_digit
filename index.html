@@ -817,7 +817,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2112</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2138</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -954,9 +954,9 @@
           </span>
         </div>
       </div>
-      <div class="block-meta-bottom">
-        <span>PRECISION GNSS TIME STAMP</span>
-        <span id="epoch-seconds" class="font-mono">T-00:00</span>
+      <div class="block-meta-bottom" id="timegrid-bottom-meta" title="Tap to toggle: DAMON (Countdown) / NOMAD (Elapsed) / UNIX Epoch" style="cursor: pointer;">
+        <span id="annual-time-label">DAMON TIME (COUNTDOWN)</span>
+        <span id="epoch-seconds" class="font-mono" title="DAMON Time: Seconds remaining until New Year (Counts backwards to zero)">7765000</span>
       </div>
     </div>
 
@@ -1430,7 +1430,9 @@
       return 'West';
     }
 
-    // Chronometry Engine
+    // Chronometry Engine & Annual Nomad/Damon Time
+    let annualTimeMode = localStorage.getItem('nomad_annual_time_mode') || 'damon';
+
     function updateClock() {
       const now = new Date();
       let hours = now.getHours();
@@ -1451,8 +1453,53 @@
       const dd = String(now.getDate()).padStart(2, '0');
       const yyyy = now.getFullYear();
       document.getElementById('clock-date').innerHTML = `${mm}<span class="date-dot">·</span>${dd}<span class="date-dot">·</span>${yyyy}`;
-      document.getElementById('epoch-seconds').textContent = `T-${Math.floor(now.getTime() / 1000) % 100000}`;
+
+      const labelEl = document.getElementById('annual-time-label');
+      const valEl = document.getElementById('epoch-seconds');
+      const startOfYear = new Date(yyyy, 0, 1, 0, 0, 0, 0);
+      const endOfYear = new Date(yyyy + 1, 0, 1, 0, 0, 0, 0);
+
+      if (annualTimeMode === 'damon') {
+        const remainingSec = Math.max(0, Math.floor((endOfYear.getTime() - now.getTime()) / 1000));
+        if (labelEl) labelEl.textContent = 'DAMON TIME (COUNTDOWN)';
+        if (valEl) {
+          valEl.textContent = remainingSec;
+          valEl.title = `DAMON Time: ${remainingSec} seconds remaining until New Year ${yyyy + 1} (Counts backwards to zero)`;
+        }
+      } else if (annualTimeMode === 'nomad') {
+        const elapsedSec = Math.max(0, Math.floor((now.getTime() - startOfYear.getTime()) / 1000));
+        if (labelEl) labelEl.textContent = 'NOMAD TIME (ELAPSED)';
+        if (valEl) {
+          valEl.textContent = elapsedSec;
+          valEl.title = `NOMAD Time: ${elapsedSec} seconds elapsed in ${yyyy} since Jan 1`;
+        }
+      } else {
+        const epochSec = Math.floor(now.getTime() / 1000);
+        if (labelEl) labelEl.textContent = 'UNIX EPOCH TIMESTAMP';
+        if (valEl) {
+          valEl.textContent = epochSec;
+          valEl.title = 'Unix Epoch Time: Total seconds elapsed since Jan 1, 1970 00:00:00 UTC';
+        }
+      }
     }
+
+    document.getElementById('timegrid-bottom-meta')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playTone(1050);
+      if (annualTimeMode === 'damon') {
+        annualTimeMode = 'nomad';
+        showToast('NOMAD TIME: ANNUAL ELAPSED SECONDS');
+      } else if (annualTimeMode === 'nomad') {
+        annualTimeMode = 'epoch';
+        showToast('UNIX EPOCH: SECONDS SINCE 1970');
+      } else {
+        annualTimeMode = 'damon';
+        showToast('DAMON TIME: NEW YEAR COUNTDOWN SECONDS');
+      }
+      try { localStorage.setItem('nomad_annual_time_mode', annualTimeMode); } catch (err) {}
+      updateClock();
+    });
+
     setInterval(updateClock, 1000);
     updateClock();
 
@@ -2242,7 +2289,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2112';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2138';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

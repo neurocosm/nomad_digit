@@ -1,6 +1,6 @@
 {
-  "version": "v1.10022026.2101",
+  "version": "v1.10022026.2112",
   "buildDate": "10022026",
-  "buildTimeEastern": "2101",
-  "releaseNotes": "Engineered 4-Theme Avionics Selector toggled via NOMAD: DIGIT: Original Vivid HUD, Relaxed 256-Gray, Apollo (Retro Naval R-W-B), and Arizona Dusk (Desert Sunset), all featuring solid obsidian black OLED backdrops with zero-glare calibrated luminance."
+  "buildTimeEastern": "2112",
+  "releaseNotes": "Tightened CHRONOMETRY date spacing: removed wide monospace advance spaces and calibrated precision micro-margins on the middle dot separators (MM·DD·YYYY)."
 }

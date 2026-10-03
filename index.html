@@ -685,6 +685,14 @@
       transition: font-size 0.15s ease;
     }
 
+    .date-dot {
+      display: inline-block;
+      opacity: 0.45;
+      font-weight: 400;
+      margin: 0 2px;
+      line-height: 1;
+    }
+
     /* Philosophy Quote Styling & Dynamic Viewport */
     .phil-quote-viewport {
       width: 100%;
@@ -809,7 +817,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2101</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2112</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -942,7 +950,7 @@
             TUESDAY
           </div>
           <span id="clock-date" class="font-mono" style="font-size: clamp(0.97rem, 2.52vh, 1.21rem); color: var(--text-main); font-weight: 700; white-space: nowrap; line-height: 1.15; margin-top: 2px;">
-            09 29 2026
+            10<span class="date-dot">·</span>02<span class="date-dot">·</span>2026
           </span>
         </div>
       </div>
@@ -1442,7 +1450,7 @@
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
       const yyyy = now.getFullYear();
-      document.getElementById('clock-date').textContent = `${mm} ${dd} ${yyyy}`;
+      document.getElementById('clock-date').innerHTML = `${mm}<span class="date-dot">·</span>${dd}<span class="date-dot">·</span>${yyyy}`;
       document.getElementById('epoch-seconds').textContent = `T-${Math.floor(now.getTime() / 1000) % 100000}`;
     }
     setInterval(updateClock, 1000);
@@ -2234,7 +2242,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2101';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2112';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

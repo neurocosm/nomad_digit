@@ -77,8 +77,40 @@
       color: #a4abb5;
     }
 
-    body.mode-relaxed .footer-bar .footer-brand {
-      color: #8b96a4;
+    body.mode-relaxed .block-badge {
+      border: 1px solid rgba(148, 163, 184, 0.28) !important;
+      color: #88929e !important;
+      background: transparent !important;
+    }
+
+    body.mode-relaxed .block-badge.locked {
+      border-color: rgba(148, 163, 184, 0.40) !important;
+      color: #9ea7b4 !important;
+    }
+
+    body.mode-relaxed .block-badge.stopped {
+      border-color: rgba(148, 163, 184, 0.20) !important;
+      color: #6b7480 !important;
+    }
+
+    body.mode-relaxed .version-tag {
+      border-color: rgba(148, 163, 184, 0.22) !important;
+      background: rgba(18, 22, 28, 0.6) !important;
+      color: #6b7480 !important;
+    }
+
+    body.mode-relaxed #clock-day {
+      color: #88929e !important;
+    }
+
+    body.mode-relaxed .footer-bar {
+      color: #444c56 !important;
+    }
+
+    body.mode-relaxed .footer-bar .footer-brand,
+    body.mode-relaxed .footer-bar a {
+      color: #727b87 !important;
+      font-weight: 500;
     }
 
     * {
@@ -582,7 +614,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2036</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2054</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -1981,7 +2013,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2036';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2054';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

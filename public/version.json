@@ -1,6 +1,6 @@
 {
-  "version": "v1.10022026.2036",
+  "version": "v1.10022026.2054",
   "buildDate": "10022026",
-  "buildTimeEastern": "2036",
-  "releaseNotes": "Added Relaxed 256-Gray color mode (zero glare, no pure whites, toned-down brightness) toggled by tapping NOMAD: DIGIT with persistent state and HUD toast confirmation."
+  "buildTimeEastern": "2054",
+  "releaseNotes": "Calibrated Relaxed mode pills (03 Weather, 04 Chrono, 05 Cognition) to 100% neutral monochrome gray borders and text; styled BostonyFX footer signature in sleek titanium graphite gray."
 }

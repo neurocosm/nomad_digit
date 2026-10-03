@@ -31,6 +31,56 @@
       --radius-block: 12px;
     }
 
+    /* Relaxed 256-Gray Monochrome Mode (Toned-down luminance, ZERO pure whites) */
+    body.mode-relaxed {
+      --bg-main: #080a0d;
+      --bg-card: #0f1217;
+      --bg-card-hover: #151921;
+      --border-cyan: rgba(148, 163, 184, 0.22);
+      --border-cyan-bright: rgba(175, 186, 199, 0.45);
+      --text-main: #9ea7b4; /* Calm matte titanium silver — ZERO harsh white */
+      --text-muted: #6b7480; /* Soft mid slate */
+      --text-dim: #444c56; /* Subtle shadow line */
+      --accent-cyan: #8b96a4; /* Muted steel/pewter slate */
+      --accent-green: #83918b; /* Calmed sage-slate */
+      --accent-amber: #948c82; /* Warm graphite */
+    }
+
+    body.mode-relaxed .loc-city-state {
+      color: #88919d !important;
+    }
+
+    body.mode-relaxed .loc-county-zip {
+      color: #636b77 !important;
+    }
+
+    body.mode-relaxed .phil-quote-text {
+      color: #98a1ad !important;
+    }
+
+    body.mode-relaxed .app-title {
+      color: #9ea7b4;
+    }
+
+    body.mode-relaxed .app-title .dot {
+      background: #76808e;
+      box-shadow: none;
+    }
+
+    body.mode-relaxed .btn-ctrl.active {
+      border-color: rgba(158, 167, 180, 0.5);
+      color: #9ea7b4;
+    }
+
+    body.mode-relaxed .toast-pill {
+      background: #323943;
+      color: #a4abb5;
+    }
+
+    body.mode-relaxed .footer-bar .footer-brand {
+      color: #8b96a4;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -83,6 +133,20 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      padding: 3px 6px;
+      margin-left: -6px;
+      border-radius: 6px;
+      transition: background-color 0.15s, opacity 0.15s, transform 0.1s;
+    }
+
+    .app-title:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .app-title:active {
+      transform: scale(0.96);
     }
 
     .app-title .dot {
@@ -489,6 +553,13 @@
   </style>
 </head>
 <body>
+  <script>
+    try {
+      if (localStorage.getItem('nomad_color_mode') === 'relaxed') {
+        document.body.classList.add('mode-relaxed');
+      }
+    } catch (e) {}
+  </script>
 
   <!-- Non-rendered DOM Telemetry Vault for external scripts -->
   <div class="hidden-telemetry-vault" style="display:none;" aria-hidden="true">
@@ -507,11 +578,11 @@
 
   <!-- Top Controls -->
   <div class="top-header">
-    <div class="app-title nomad-brand">
+    <div id="btn-brand-mode" class="app-title nomad-brand" title="Tap: Toggle Relaxed 256-Gray Mode">
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2027</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2036</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -753,6 +824,7 @@
       lastGeocodedLon: null,
       lastGeocodedTime: 0,
       soundEnabled: true,
+      colorMode: localStorage.getItem('nomad_color_mode') || 'vivid',
       weather: {
         tempF: 72.0,
         tempC: 22.0,
@@ -1771,6 +1843,37 @@
     });
 
     // ==========================================
+    // RELAXED 256-GRAY COLOR MODE CONTROLLER
+    // ==========================================
+    function applyColorMode(mode) {
+      state.colorMode = mode;
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (mode === 'relaxed') {
+        document.body.classList.add('mode-relaxed');
+        if (themeMeta) themeMeta.setAttribute('content', '#080a0d');
+      } else {
+        document.body.classList.remove('mode-relaxed');
+        if (themeMeta) themeMeta.setAttribute('content', '#050811');
+      }
+      try {
+        localStorage.setItem('nomad_color_mode', mode);
+      } catch (e) {}
+    }
+
+    const brandBtn = document.getElementById('btn-brand-mode');
+    if (brandBtn) {
+      brandBtn.addEventListener('click', () => {
+        const nextMode = state.colorMode === 'relaxed' ? 'vivid' : 'relaxed';
+        playTone(nextMode === 'relaxed' ? 750 : 1250);
+        applyColorMode(nextMode);
+        showToast(nextMode === 'relaxed' ? 'RELAXED MODE: ON (256 GRAY)' : 'RELAXED MODE: OFF (VIVID HUD)');
+      });
+    }
+
+    // Apply color mode from storage on initial run
+    applyColorMode(state.colorMode);
+
+    // ==========================================
     // AUDIO ON/OFF & LONG-PRESS DEEP CACHE FLUSH
     // ==========================================
     const audioBtn = document.getElementById('btn-audio');
@@ -1878,7 +1981,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2027';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2036';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

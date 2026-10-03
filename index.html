@@ -31,7 +31,10 @@
       --radius-block: 12px;
     }
 
-    /* Relaxed 256-Gray Monochrome Mode (Toned-down luminance, ZERO pure whites) */
+    /* ========================================================
+       THEME 2: RELAXED 256-GRAY (MONOCHROME TITANIUM SLATE)
+       ======================================================== */
+    body.theme-gray,
     body.mode-relaxed {
       --bg-main: #080a0d;
       --bg-card: #0f1217;
@@ -46,70 +49,257 @@
       --accent-amber: #948c82; /* Warm graphite */
     }
 
+    body.theme-gray .loc-city-state,
     body.mode-relaxed .loc-city-state {
       color: #88919d !important;
     }
 
+    body.theme-gray .loc-county-zip,
     body.mode-relaxed .loc-county-zip {
       color: #636b77 !important;
     }
 
+    body.theme-gray .phil-quote-text,
     body.mode-relaxed .phil-quote-text {
       color: #98a1ad !important;
     }
 
+    body.theme-gray .app-title,
     body.mode-relaxed .app-title {
       color: #9ea7b4;
     }
 
+    body.theme-gray .app-title .dot,
     body.mode-relaxed .app-title .dot {
       background: #76808e;
       box-shadow: none;
     }
 
+    body.theme-gray .btn-ctrl.active,
     body.mode-relaxed .btn-ctrl.active {
       border-color: rgba(158, 167, 180, 0.5);
       color: #9ea7b4;
     }
 
+    body.theme-gray .toast-pill,
     body.mode-relaxed .toast-pill {
       background: #323943;
       color: #a4abb5;
     }
 
+    body.theme-gray .block-badge,
     body.mode-relaxed .block-badge {
       border: 1px solid rgba(148, 163, 184, 0.28) !important;
       color: #88929e !important;
       background: transparent !important;
     }
 
+    body.theme-gray .block-badge.locked,
     body.mode-relaxed .block-badge.locked {
       border-color: rgba(148, 163, 184, 0.40) !important;
       color: #9ea7b4 !important;
     }
 
+    body.theme-gray .block-badge.stopped,
     body.mode-relaxed .block-badge.stopped {
       border-color: rgba(148, 163, 184, 0.20) !important;
       color: #6b7480 !important;
     }
 
+    body.theme-gray .version-tag,
     body.mode-relaxed .version-tag {
       border-color: rgba(148, 163, 184, 0.22) !important;
       background: rgba(18, 22, 28, 0.6) !important;
       color: #6b7480 !important;
     }
 
+    body.theme-gray #clock-day,
     body.mode-relaxed #clock-day {
       color: #88929e !important;
     }
 
+    body.theme-gray .footer-bar,
     body.mode-relaxed .footer-bar {
       color: #444c56 !important;
     }
 
+    body.theme-gray .footer-bar .footer-brand,
+    body.theme-gray .footer-bar a,
     body.mode-relaxed .footer-bar .footer-brand,
     body.mode-relaxed .footer-bar a {
       color: #727b87 !important;
+      font-weight: 500;
+    }
+
+    /* ========================================================
+       THEME 3: APOLLO HERITAGE (RETRO NAVAL R-W-B)
+       Solid Obsidian Backdrop, Matte Bone Chalk, Steel Cadet Blue,
+       and Subdued Apollo Crimson Accents.
+       ======================================================== */
+    body.theme-apollo {
+      --bg-main: #080a0d;
+      --bg-card: #0d1219;
+      --bg-card-hover: #131922;
+      --border-cyan: rgba(95, 126, 155, 0.28);
+      --border-cyan-bright: rgba(95, 126, 155, 0.55);
+      --text-main: #b4bcc8; /* Matte Apollo Bone / Chalk White */
+      --text-muted: #6e7e93;
+      --text-dim: #444f5e;
+      --accent-cyan: #5f7e9b; /* Steel Cadet Blue */
+      --accent-green: #6f9185; /* Lunar Command Green */
+      --accent-amber: #b25555; /* Subdued Apollo Crimson */
+    }
+
+    body.theme-apollo .loc-city-state {
+      color: #8496ab !important;
+    }
+
+    body.theme-apollo .loc-county-zip {
+      color: #5d6b7b !important;
+    }
+
+    body.theme-apollo .phil-quote-text {
+      color: #a0aab8 !important;
+    }
+
+    body.theme-apollo .app-title {
+      color: #5f7e9b;
+    }
+
+    body.theme-apollo .app-title .dot {
+      background: #b25555;
+      box-shadow: 0 0 6px rgba(178, 85, 85, 0.5);
+    }
+
+    body.theme-apollo .btn-ctrl.active {
+      border-color: rgba(95, 126, 155, 0.6);
+      color: #b4bcc8;
+    }
+
+    body.theme-apollo .toast-pill {
+      background: #222c3a;
+      color: #b4bcc8;
+    }
+
+    body.theme-apollo .block-badge {
+      border: 1px solid rgba(95, 126, 155, 0.35) !important;
+      color: #7b96b2 !important;
+      background: transparent !important;
+    }
+
+    body.theme-apollo .block-badge.locked {
+      border-color: rgba(178, 85, 85, 0.55) !important;
+      color: #c46a6a !important;
+    }
+
+    body.theme-apollo .block-badge.stopped {
+      border-color: rgba(95, 126, 155, 0.22) !important;
+      color: #5a6878 !important;
+    }
+
+    body.theme-apollo .version-tag {
+      border-color: rgba(95, 126, 155, 0.25) !important;
+      background: rgba(13, 18, 25, 0.6) !important;
+      color: #6e7e93 !important;
+    }
+
+    body.theme-apollo #clock-day {
+      color: #5f7e9b !important;
+    }
+
+    body.theme-apollo .footer-bar {
+      color: #444f5e !important;
+    }
+
+    body.theme-apollo .footer-bar .footer-brand,
+    body.theme-apollo .footer-bar a {
+      color: #7b96b2 !important;
+      font-weight: 500;
+    }
+
+    /* ========================================================
+       THEME 4: ARIZONA DUSK (DESERT SUNSET / MOJAVE TWILIGHT)
+       Solid Obsidian Backdrop, Sun-Bleached Sand, Washed Agave,
+       and Canyon Terracotta / Dusk Copper Accents.
+       ======================================================== */
+    body.theme-arizona {
+      --bg-main: #080a0d;
+      --bg-card: #141012;
+      --bg-card-hover: #1c1719;
+      --border-cyan: rgba(184, 109, 78, 0.28);
+      --border-cyan-bright: rgba(184, 109, 78, 0.55);
+      --text-main: #c4b8a5; /* Sun-bleached Dune Sand */
+      --text-muted: #827267;
+      --text-dim: #4a403b;
+      --accent-cyan: #689793; /* Washed Agave Turquoise */
+      --accent-green: #7d8c76; /* Desert Cactus Sage */
+      --accent-amber: #b86d4e; /* Canyon Terracotta / Dusk Copper */
+    }
+
+    body.theme-arizona .loc-city-state {
+      color: #9c8d82 !important;
+    }
+
+    body.theme-arizona .loc-county-zip {
+      color: #6e6157 !important;
+    }
+
+    body.theme-arizona .phil-quote-text {
+      color: #b8ab99 !important;
+    }
+
+    body.theme-arizona .app-title {
+      color: #b86d4e;
+    }
+
+    body.theme-arizona .app-title .dot {
+      background: #689793;
+      box-shadow: 0 0 6px rgba(104, 151, 147, 0.5);
+    }
+
+    body.theme-arizona .btn-ctrl.active {
+      border-color: rgba(184, 109, 78, 0.6);
+      color: #c4b8a5;
+    }
+
+    body.theme-arizona .toast-pill {
+      background: #332624;
+      color: #c4b8a5;
+    }
+
+    body.theme-arizona .block-badge {
+      border: 1px solid rgba(184, 109, 78, 0.35) !important;
+      color: #b87758 !important;
+      background: transparent !important;
+    }
+
+    body.theme-arizona .block-badge.locked {
+      border-color: rgba(104, 151, 147, 0.55) !important;
+      color: #7faaa6 !important;
+    }
+
+    body.theme-arizona .block-badge.stopped {
+      border-color: rgba(130, 114, 103, 0.25) !important;
+      color: #6e6157 !important;
+    }
+
+    body.theme-arizona .version-tag {
+      border-color: rgba(184, 109, 78, 0.25) !important;
+      background: rgba(20, 16, 18, 0.6) !important;
+      color: #827267 !important;
+    }
+
+    body.theme-arizona #clock-day {
+      color: #b86d4e !important;
+    }
+
+    body.theme-arizona .footer-bar {
+      color: #4a403b !important;
+    }
+
+    body.theme-arizona .footer-bar .footer-brand,
+    body.theme-arizona .footer-bar a {
+      color: #b87758 !important;
       font-weight: 500;
     }
 
@@ -587,8 +777,13 @@
 <body>
   <script>
     try {
-      if (localStorage.getItem('nomad_color_mode') === 'relaxed') {
-        document.body.classList.add('mode-relaxed');
+      var savedTheme = localStorage.getItem('nomad_color_theme') || localStorage.getItem('nomad_color_mode');
+      if (savedTheme === 'gray' || savedTheme === 'relaxed') {
+        document.body.classList.add('theme-gray', 'mode-relaxed');
+      } else if (savedTheme === 'apollo') {
+        document.body.classList.add('theme-apollo');
+      } else if (savedTheme === 'arizona') {
+        document.body.classList.add('theme-arizona');
       }
     } catch (e) {}
   </script>
@@ -610,11 +805,11 @@
 
   <!-- Top Controls -->
   <div class="top-header">
-    <div id="btn-brand-mode" class="app-title nomad-brand" title="Tap: Toggle Relaxed 256-Gray Mode">
+    <div id="btn-brand-mode" class="app-title nomad-brand" title="Tap: Toggle Theme (Vivid / 256-Gray / Apollo / Arizona)">
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2054</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2101</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -826,6 +1021,15 @@
         .replace(/\bSouthwest\b/gi, 'SW');
     }
 
+    function getInitialTheme() {
+      try {
+        const stored = localStorage.getItem('nomad_color_theme') || localStorage.getItem('nomad_color_mode');
+        if (stored === 'relaxed') return 'gray';
+        if (['vivid', 'gray', 'apollo', 'arizona'].includes(stored)) return stored;
+      } catch (e) {}
+      return 'vivid';
+    }
+
     // Remove any legacy calibration from local storage
     try {
       localStorage.removeItem('nomad_calibrated_location');
@@ -856,7 +1060,7 @@
       lastGeocodedLon: null,
       lastGeocodedTime: 0,
       soundEnabled: true,
-      colorMode: localStorage.getItem('nomad_color_mode') || 'vivid',
+      colorTheme: getInitialTheme(),
       weather: {
         tempF: 72.0,
         tempC: 22.0,
@@ -1875,35 +2079,52 @@
     });
 
     // ==========================================
-    // RELAXED 256-GRAY COLOR MODE CONTROLLER
+    // 4-THEME AVIONICS COLOR CONTROLLER
     // ==========================================
-    function applyColorMode(mode) {
-      state.colorMode = mode;
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (mode === 'relaxed') {
-        document.body.classList.add('mode-relaxed');
-        if (themeMeta) themeMeta.setAttribute('content', '#080a0d');
-      } else {
-        document.body.classList.remove('mode-relaxed');
-        if (themeMeta) themeMeta.setAttribute('content', '#050811');
+    const NOMAD_THEMES = [
+      { id: 'vivid', name: 'ORIGINAL VIVID HUD', className: '', freq: 1200, bgThemeColor: '#050811' },
+      { id: 'gray', name: 'RELAXED 256-GRAY', className: 'theme-gray mode-relaxed', freq: 750, bgThemeColor: '#080a0d' },
+      { id: 'apollo', name: 'APOLLO (R-W-B)', className: 'theme-apollo', freq: 900, bgThemeColor: '#080a0d' },
+      { id: 'arizona', name: 'ARIZONA DUSK', className: 'theme-arizona', freq: 1050, bgThemeColor: '#080a0d' }
+    ];
+
+    function applyTheme(themeId) {
+      state.colorTheme = themeId;
+      document.body.classList.remove('theme-gray', 'mode-relaxed', 'theme-apollo', 'theme-arizona');
+
+      const themeObj = NOMAD_THEMES.find(t => t.id === themeId) || NOMAD_THEMES[0];
+      if (themeObj.className) {
+        themeObj.className.split(' ').forEach(cls => {
+          if (cls) document.body.classList.add(cls);
+        });
       }
+
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) {
+        themeMeta.setAttribute('content', themeObj.bgThemeColor);
+      }
+
       try {
-        localStorage.setItem('nomad_color_mode', mode);
+        localStorage.setItem('nomad_color_theme', themeId);
+        localStorage.setItem('nomad_color_mode', themeId);
       } catch (e) {}
     }
 
     const brandBtn = document.getElementById('btn-brand-mode');
     if (brandBtn) {
       brandBtn.addEventListener('click', () => {
-        const nextMode = state.colorMode === 'relaxed' ? 'vivid' : 'relaxed';
-        playTone(nextMode === 'relaxed' ? 750 : 1250);
-        applyColorMode(nextMode);
-        showToast(nextMode === 'relaxed' ? 'RELAXED MODE: ON (256 GRAY)' : 'RELAXED MODE: OFF (VIVID HUD)');
+        const currentIndex = NOMAD_THEMES.findIndex(t => t.id === state.colorTheme);
+        const nextIndex = (currentIndex + 1) % NOMAD_THEMES.length;
+        const nextTheme = NOMAD_THEMES[nextIndex];
+
+        playTone(nextTheme.freq);
+        applyTheme(nextTheme.id);
+        showToast(`THEME: ${nextTheme.name}`);
       });
     }
 
-    // Apply color mode from storage on initial run
-    applyColorMode(state.colorMode);
+    // Apply active theme on initial load
+    applyTheme(state.colorTheme);
 
     // ==========================================
     // AUDIO ON/OFF & LONG-PRESS DEEP CACHE FLUSH
@@ -2013,7 +2234,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2054';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2101';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 

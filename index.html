@@ -12,6 +12,9 @@
   <meta name="theme-color" content="#050811" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
@@ -817,8 +820,9 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2149</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2157</div>
     <div class="top-controls">
+      <button id="btn-install-pwa" class="btn-ctrl" style="display: none; border-color: var(--accent-cyan); color: var(--accent-cyan);" title="Install Nomad DIGIT to your device">INSTALL</button>
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
   </div>
@@ -2289,9 +2293,44 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2149';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2157';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
+
+    // In-App PWA Install Flow
+    let deferredInstallPrompt = null;
+    const installBtn = document.getElementById('btn-install-pwa');
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (installBtn && !isStandalone) {
+        installBtn.style.display = 'inline-flex';
+      }
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        playTone(1200);
+        if (!deferredInstallPrompt) {
+          showToast('PWA: Tap Chrome ⋮ menu -> Install App');
+          return;
+        }
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+          showToast('NOMAD DIGIT INSTALLED');
+        }
+        deferredInstallPrompt = null;
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      if (installBtn) installBtn.style.display = 'none';
+      showToast('NOMAD DIGIT INSTALLED');
+    });
 
     const versionTagEl = document.getElementById('hud-version');
 

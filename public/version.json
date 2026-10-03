@@ -1,6 +1,6 @@
 {
-  "version": "v1.10022026.2021",
+  "version": "v1.10022026.2027",
   "buildDate": "10022026",
-  "buildTimeEastern": "2021",
-  "releaseNotes": "Tightened corner radius to 12px with 12px inner padding, removed all translucent pill fill washes to eliminate perceived glow halos, and streamlined Block 01 telemetry badge to single line NET-GEO."
+  "buildTimeEastern": "2027",
+  "releaseNotes": "Adjusted pill, coords, author, and BostonyFX branding font weight to 450 for clean medium weight; removed API suffix from Daily Quote pill."
 }

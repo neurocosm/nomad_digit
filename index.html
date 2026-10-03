@@ -14,7 +14,7 @@
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #050811;
@@ -252,7 +252,7 @@
       padding: 1px 7px;
       border-radius: 6px;
       font-size: 0.6rem;
-      font-weight: 700;
+      font-weight: 450;
       background: transparent;
       border: 1px solid rgba(0, 243, 255, 0.45);
       color: var(--accent-cyan);
@@ -440,7 +440,7 @@
       font-size: 0.66rem;
       font-family: 'JetBrains Mono', monospace;
       color: var(--accent-cyan);
-      font-weight: 600;
+      font-weight: 450;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       white-space: nowrap;
@@ -472,8 +472,14 @@
       font-size: 0.6rem;
       color: var(--text-dim);
       font-family: 'JetBrains Mono', monospace;
+      font-weight: 450;
       text-align: center;
       line-height: 16px;
+    }
+
+    .footer-bar .footer-brand {
+      font-weight: 450;
+      color: var(--accent-cyan);
     }
 
     .footer-bar a {
@@ -505,7 +511,7 @@
       <span class="dot"></span>
       <span>NOMAD: DIGIT</span>
     </div>
-    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2021</div>
+    <div class="version-tag" id="hud-version" title="System Version • Tap to check updates">v1.10022026.2027</div>
     <div class="top-controls">
       <button id="btn-audio" class="btn-ctrl active" title="Tap: Audio On/Off • Hold 1s: Deep Flush App Cache">AUDIO: ON</button>
     </div>
@@ -532,10 +538,10 @@
         </div>
       </div>
       <div class="block-meta-bottom">
-        <span id="coords-lat-lon" class="font-mono" style="color: var(--accent-cyan); font-weight: 600;">
+        <span id="coords-lat-lon" class="font-mono" style="color: var(--accent-cyan); font-weight: 450;">
           ACQUIRING POSITION...
         </span>
-        <span style="color: var(--accent-cyan); font-weight: 600;">TAP: COPY COORDS</span>
+        <span style="color: var(--accent-cyan); font-weight: 450;">TAP: COPY COORDS</span>
       </div>
     </div>
 
@@ -652,7 +658,7 @@
     <div id="block-philosophy" class="rounded-block" title="Tap to refresh quote">
       <div class="block-meta-top">
         <span>05 // COGNITION &amp; PERSPECTIVE</span>
-        <span id="phil-status-badge" class="block-badge">DAILY QUOTE API</span>
+        <span id="phil-status-badge" class="block-badge">DAILY QUOTE</span>
       </div>
       <div class="phil-quote-viewport" id="phil-quote-viewport">
         <div id="phil-quote" class="phil-quote-text">
@@ -661,7 +667,7 @@
       </div>
       <div class="block-meta-bottom">
         <span id="phil-author" class="phil-author">— ...</span>
-        <span style="color: var(--accent-cyan); font-weight: 600;">TAP: REFRESH</span>
+        <span style="color: var(--accent-cyan); font-weight: 450;">TAP: REFRESH</span>
       </div>
     </div>
 
@@ -669,7 +675,7 @@
 
   <!-- Footer Credits -->
   <footer class="footer-bar nomad-footer">
-    NOMAD: DIGIT • Telemetry HUD • Crafted by BostonyFX
+    NOMAD: DIGIT • Telemetry HUD • Crafted by <span class="footer-brand">BostonyFX</span>
   </footer>
 
   <div id="toast-pill" class="toast-pill">COPIED TO CLIPBOARD</div>
@@ -930,7 +936,7 @@
             const data = JSON.parse(cachedPayload);
             if (data && data.quote) {
               state.philosophy = data;
-              if (badge) badge.textContent = 'DAILY QUOTE API';
+              if (badge) badge.textContent = 'DAILY QUOTE';
               renderPhilosophy();
               return;
             }
@@ -1003,11 +1009,11 @@
           localStorage.setItem('nomad_daily_quote_date', todayKey);
           localStorage.setItem('nomad_daily_quote_payload', JSON.stringify(fetched));
         } catch (e) {}
-        if (badge) badge.textContent = 'DAILY QUOTE API';
+        if (badge) badge.textContent = 'DAILY QUOTE';
         renderPhilosophy();
         if (forceRefresh) showToast('NEW QUOTE LOADED');
       } else {
-        if (badge) badge.textContent = 'API RETRY...';
+        if (badge) badge.textContent = 'RETRY...';
       }
     }
 
@@ -1872,7 +1878,7 @@
     // ==========================================
     // NOMAD: DIGIT — Versioning & PWA Call-Home Engine
     // ==========================================
-    const NOMAD_CURRENT_VERSION = 'v1.10022026.2021';
+    const NOMAD_CURRENT_VERSION = 'v1.10022026.2027';
     let serviceWorkerRegistration = null;
     let isUpdateAvailable = false;
 
